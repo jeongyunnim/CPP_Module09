@@ -4,8 +4,9 @@
 
 #include <iostream>
 #include <fstream>
-#include <sstream>
 #include <map>
+#include <algorithm>
+#include <sstream>
 #include "../Colors.hpp"
 
 class BitcoinExchange

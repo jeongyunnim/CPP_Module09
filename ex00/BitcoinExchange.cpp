@@ -150,23 +150,23 @@ bool BitcoinExchange::parsingDataFile(const std::string& fileName)
 		return (false);
 	}
 	database.close();
-	printDatabaseMap(_exchangeRateData);
+	// printDatabaseMap(_exchangeRateData);
 	return (true);
 }
 
-static bool isValidIntValueString(std::string& valueString, int& iValue)
+static bool isValidIntValueString(std::string& valueString, double& dValue)
 {
 	std::stringstream valueStream(valueString);
-	valueStream >> iValue;
-	if (valueStream.eof() == false || valueStream.fail() || iValue < 0 || 1000 < iValue)
+	valueStream >> dValue;
+	if (valueStream.eof() == false || valueStream.fail() || dValue < 0 || 1000 < dValue)
 		return (false);
 	return (true);
 }
 
 static double searchTargetValue(std::map<std::string, double>& _exchangeRateData, std::string date)
 {
-	std::map<std::string, double>::iterator it = std::lower_bound(_exchangeRateData.begin(), _exchangeRateData.end(), date);
-
+	std::map<std::string, double>::iterator it = _exchangeRateData.lower_bound(date);
+	
 	std::cout << "date: " << date << "[map] <" << it->first << "> -> " << it->second << std::endl;
 	// if (it->first == date)
 	// 	return (it->second);
@@ -178,23 +178,23 @@ static bool convertExchanges(std::string& oneLine, std::map<std::string, double>
 {
 	std::stringstream	oneLineStream(oneLine);
 	std::string 		dateString;
+	std::string 		delimeterString;
 	std::string 		valueString;
-	int					iValue;
+	double				dValue;
 	double				result;
 
-	std::getline(oneLineStream, dateString, ',');
-	if (isValidDate(dateString) == false)
-	{
-		std::cout << dateString << ": ";
+	std::getline(oneLineStream, dateString, ' ');
+	if (oneLineStream.eof() || oneLineStream.fail() || isValidDate(dateString) == false)
 		return (false);
-	}
+	std::getline(oneLineStream, delimeterString, ' ');
+	if (oneLineStream.eof() || oneLineStream.fail() || delimeterString != "|")
+		return (false);
 	std::getline(oneLineStream, valueString, '\n');
-	if (isValidIntValueString(valueString, iValue) == false)
-	{
-		std::cout << valueString << ": ";
+	if (oneLineStream.eof() == false || oneLineStream.fail() == true)
 		return (false);
-	}
-	result = searchTargetValue(_exchangeRateData, dateString) * iValue;
+	if (isValidIntValueString(valueString, dValue) == false)
+		return (false);
+	result = searchTargetValue(_exchangeRateData, dateString) * dValue;
 	//찾기 -> 밸류 값 곱해서 출력하기.
 	if (oneLineStream.eof() == false || oneLineStream.fail())
 		return (false);
@@ -208,16 +208,16 @@ void	BitcoinExchange::printExchangeRates(std::ifstream& input)
 	std::getline(input, oneLineString, '\n');
 	if (oneLineString != "date | value")
 	{
-		std::cout << Colors::Red << "Error: bad input =>" << oneLineString << Colors::Reset << std::endl;
+		std::cout << Colors::Red << "Error: bad input => " << oneLineString << Colors::Reset << std::endl;
 		return ;
 	}
 	std::getline(input, oneLineString);
 	while (input.eof() == false || input.fail() == false)
 	{
 		if (_exchangeRateData.size() == 0)
-			std::cout << Colors::Red << "Error: database is empty =>" << oneLineString << Colors::Reset << std::endl;
+			std::cout << Colors::Red << "Error: database is empty => " << oneLineString << Colors::Reset << std::endl;
 		else if (convertExchanges(oneLineString, _exchangeRateData) == false)
-			std::cout << Colors::Red << "Error: bad input =>" << oneLineString << Colors::Reset << std::endl;
+			std::cout << Colors::Red << "Error: bad input => " << oneLineString << Colors::Reset << std::endl;
 		oneLineString.clear();
 		std::getline(input, oneLineString);
 	}
@@ -237,6 +237,7 @@ bool BitcoinExchange::parsingInputFile(const std::string& fileName)
 		std::cout << Colors::Red << "Error: input file open error." << Colors::Reset << std::endl;
 		return (false);
 	}
+	// std::cout << "oh" << std::endl;
 	printExchangeRates(input);
 	input.close();
 	return (true);
