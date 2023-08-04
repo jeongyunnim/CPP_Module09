@@ -157,9 +157,29 @@ bool BitcoinExchange::parsingDataFile(const std::string& fileName)
 static bool isValidIntValueString(std::string& valueString, double& dValue)
 {
 	std::stringstream valueStream(valueString);
+
 	valueStream >> dValue;
-	if (valueStream.eof() == false || valueStream.fail() || dValue < 0 || 1000 < dValue)
+	// whitespace를 어떻게든 처리해야 한다.
+	if (valueStream.eof() == false)
+	{
+		std::cout << Colors::Red << "Error: invalid input => " << valueString << Colors::Reset << std::endl;
 		return (false);
+	}
+	else if (valueStream.fail() == true)
+	{
+		std::cout << Colors::Red << "Error: file stream error" << Colors::Reset << std::endl;
+		return (false);
+	}
+	else if (dValue < 0)
+	{
+		std::cout << Colors::Red << "Error: not a positive input number => " << valueString << Colors::Reset << std::endl;
+		return (false);
+	}
+	else if (1000 < dValue)
+	{
+		std::cout << Colors::Red << "Error: too large a number => " << valueString << Colors::Reset << std::endl;
+		return (false);
+	}
 	return (true);
 }
 
@@ -167,14 +187,13 @@ static double searchTargetValue(std::map<std::string, double>& _exchangeRateData
 {
 	std::map<std::string, double>::iterator it = _exchangeRateData.lower_bound(date);
 	
-	std::cout << "date: " << date << "[map] <" << it->first << "> -> " << it->second << std::endl;
-	// if (it->first == date)
-	// 	return (it->second);
-	// else (it->first == date)
+	if (it->first == date || it == _exchangeRateData.begin()) ;
+	else
+		it--;
 	return (it->second);
 }
 
-static bool convertExchanges(std::string& oneLine, std::map<std::string, double>& _exchangeRateData)
+static void convertExchanges(std::string& oneLine, std::map<std::string, double>& _exchangeRateData)
 {
 	std::stringstream	oneLineStream(oneLine);
 	std::string 		dateString;
@@ -185,20 +204,28 @@ static bool convertExchanges(std::string& oneLine, std::map<std::string, double>
 
 	std::getline(oneLineStream, dateString, ' ');
 	if (oneLineStream.eof() || oneLineStream.fail() || isValidDate(dateString) == false)
-		return (false);
+	{
+		std::cout << Colors::Red << "Error: bad input => " << oneLine << Colors::Reset << std::endl;
+		return ;
+	}
 	std::getline(oneLineStream, delimeterString, ' ');
 	if (oneLineStream.eof() || oneLineStream.fail() || delimeterString != "|")
-		return (false);
+	{
+		std::cout << Colors::Red << "Error: bad input => " << oneLine << Colors::Reset << std::endl;
+		return ;
+	}
 	std::getline(oneLineStream, valueString, '\n');
-	if (oneLineStream.eof() == false || oneLineStream.fail() == true)
-		return (false);
+	if ((oneLineStream.eof() == false || oneLineStream.fail() == true || valueString.empty() == true))
+	{
+		std::cout << Colors::Red << "Error: bad input => " << oneLine << Colors::Reset << std::endl;
+		return ;
+	}
 	if (isValidIntValueString(valueString, dValue) == false)
-		return (false);
+		return ;
 	result = searchTargetValue(_exchangeRateData, dateString) * dValue;
-	//찾기 -> 밸류 값 곱해서 출력하기.
+	std::cout << "date: " << dateString << " -> " << result << std::endl;
 	if (oneLineStream.eof() == false || oneLineStream.fail())
-		return (false);
-	return (true);
+		std::cout << Colors::Red << "Error: file stream error" << Colors::Reset << std::endl;
 }
 
 void	BitcoinExchange::printExchangeRates(std::ifstream& input)
@@ -216,8 +243,7 @@ void	BitcoinExchange::printExchangeRates(std::ifstream& input)
 	{
 		if (_exchangeRateData.size() == 0)
 			std::cout << Colors::Red << "Error: database is empty => " << oneLineString << Colors::Reset << std::endl;
-		else if (convertExchanges(oneLineString, _exchangeRateData) == false)
-			std::cout << Colors::Red << "Error: bad input => " << oneLineString << Colors::Reset << std::endl;
+		convertExchanges(oneLineString, _exchangeRateData);
 		oneLineString.clear();
 		std::getline(input, oneLineString);
 	}
@@ -237,7 +263,6 @@ bool BitcoinExchange::parsingInputFile(const std::string& fileName)
 		std::cout << Colors::Red << "Error: input file open error." << Colors::Reset << std::endl;
 		return (false);
 	}
-	// std::cout << "oh" << std::endl;
 	printExchangeRates(input);
 	input.close();
 	return (true);
