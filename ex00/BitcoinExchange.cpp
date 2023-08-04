@@ -1,39 +1,35 @@
 #include "BitcoinExchange.hpp"
 // 2008/08/18일 이전 예외처리
-/*
-	1월(1월): 31일
-	2월(2월): 28일(평년), 29일(윤년)
-	3월(3월): 31일
-	4월(4월): 30일
-	5월(5월): 31일
-	6월(6월): 30일
-	7월(7월): 31일
-	8월(8월): 31일
-	9월(9월): 30일
-	10월(10월): 31일
-	11월(11월): 30일
-	12월(12월): 31일
-*/
 
-bool isLeapYear(int year) {
+std::map<std::string, double> BitcoinExchange::_exchangeRateData;
+
+static int leapYearFeb(int year) {
 	if (year % 4 == 0) {
 		if (year % 100 != 0 || year % 400 == 0) {
-			return true;
+			return (29);
 		}
 	}
-	return false;
+	return (28);
 }
 
 static bool isValidPairOfDate(int year, int month, int day)
 {
+	int maxDay;
+
 	switch (month)
 	{
-		case 1:
-			if (day < 31)
+		case 1: case 3: case 5: case 7: case 8: case 10: case 12:
+			maxDay = 31;
 			break ;
-		
+		case 4: case 6: case 9: case 11:
+			maxDay = 30;
+			break ;
+		default:
+			maxDay = leapYearFeb(year);
 	}
-
+	if (day > maxDay)
+		return (false);
+	return (true);
 }
 
 static bool	isValidDate(const std::string& date)
@@ -42,18 +38,13 @@ static bool	isValidDate(const std::string& date)
 	int	year;
 	int	month;
 	int	day;
-	char dotFlag;
+	char dashFlag1;
+	char dashFlag2;
 	
-	dateStream >> year;
-	dotFlag = dateStream.get();
-	if (dotFlag != '-')
+	dateStream >> year >> dashFlag1 >> month >> dashFlag2 >> day;
+	if (dashFlag1 != '-' || dashFlag2 != '-')
 		return (false);
-	dateStream >> month;
-	dotFlag = dateStream.get();
-	if (dotFlag != '-')
-		return (false);
-	dateStream >> day;
-	if (dateStream.eof() == false || year < 2008 || (month < 1 || 12 < month) || (day < 1 || day > 31) || \
+	if (dateStream.eof() == false || dateStream.fail() || year < 2008 || (month < 1 || 12 < month) || (day < 1 || day > 31) || \
 		(year == 2008 && month < 8) || (year == 2008 && month < 8 && day < 18))
 		return (false);
 	if (isValidPairOfDate(year, month, day) == false)
@@ -61,46 +52,102 @@ static bool	isValidDate(const std::string& date)
 	return (true);
 }
 
-static bool databaseFileValidCheck(std::ifstream& database)
+static bool duplicateCheck(const std::string& date, const std::map<std::string, double>& map)
+{
+	std::map<std::string, double>::const_iterator it = map.find(date);
+	
+	if (it == map.end())
+		return (true);
+	return (false);
+}
+
+static bool isValidValueString(std::string& valueString, double& dValue)
+{
+	std::stringstream valueStream(valueString);
+	valueStream >> dValue;
+	if (valueStream.eof() == false || valueStream.fail() || dValue < 0 || dValue == std::numeric_limits<double>::infinity())
+		return (false);
+	return (true);
+}
+
+bool BitcoinExchange::databaseToMap(std::ifstream& database)
 {
 	std::string dateString;
 	std::string valueString;
+	double		dValue;
 
-	while (database.eof() == 1 || database.fail() == 1)
+	std::getline(database, dateString, '\n');
+	if (dateString != "date,exchange_rate")
+	{
+		std::cout << dateString << ": ";
+		return (false);
+	}
+	while (database.eof() == false || database.fail() == false)
 	{
 		std::getline(database, dateString, ',');
 		if (isValidDate(dateString) == false)
+		{
+			if (dateString.empty() == true)
+				return (true);
+			std::cout << dateString << ": ";
 			return (false);
+		}
 		std::getline(database, valueString, '\n');
-		if (std::strtod(valueString.c_str(), NULL) < 0)
+		if (isValidValueString(valueString, dValue) == false)
+		{
+			std::cout << valueString << ": ";
 			return (false);
+		}
+		if (duplicateCheck(dateString, _exchangeRateData) == false)
+		{
+			std::cout << dateString << ": ";
+			return (false);
+		}
+		_exchangeRateData.insert(std::pair<std::string, double>(dateString, dValue));
 	}
 	if (database.fail() == 1)
 		return (false);
 	return (true);
 }
 
+void printDatabaseMap(std::map<std::string, double> map)
+{
+	std::map<std::string, double>::iterator it = map.begin();
+	std::map<std::string, double>::iterator ite = map.end();
+
+	std::cout << "MAP" << std::endl;
+	while (it != ite)
+	{
+		std::cout << Colors::BoldBlue << "KEY: [" << it->first << "]" << Colors::Reset << ": " << it->second << std::endl;
+		it++;
+	}
+}
 
 bool BitcoinExchange::parsingDataFile(const std::string& fileName)
 {
-	std::ifstream database;
+	std::ifstream database(fileName);
 
-	if (database.is_open() == 0)
+	if (database.is_open() == false)
 	{
-		std::cout << "Error: database file open error." << std::endl;
+		std::cout << Colors::Red << "Error: database file open error." << Colors::Reset << std::endl;
 		return (false);
 	}
-	databaseFileValidCheck(database);
+	if (databaseToMap(database) == false)
+	{
+		std::cout << Colors::Red << "Error: database file is corrupted." << Colors::Reset << std::endl;
+		return (false);
+	}
 	database.close();
+	printDatabaseMap(_exchangeRateData);
 	return (true);
 }
 
-bool BitcoinExchange::parsingInputFile(const std::string& fileName)
-{
+// bool BitcoinExchange::parsingInputFile(const std::string& fileName)
+// {
 
-}
+// }
 
-void BitcoinExchange::printExchangeRate(const std::string& date, const std::string& value)
-{
+// void BitcoinExchange::printExchangeRate(const std::string& date, const std::string& value)
+// {
 
-}
+// }

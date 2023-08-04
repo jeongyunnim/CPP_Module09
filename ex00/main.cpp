@@ -2,6 +2,6 @@
 
 int main(void)
 {
-	
+	BitcoinExchange::parsingDataFile("data.csv");
 	return (0);
 }
