@@ -2,14 +2,15 @@
 #ifndef _BITCOIN_EXCHANGE_
 #define _BITCOIN_EXCHANGE_
 
-#include <map>
 #include <iostream>
 #include <fstream>
 #include <sstream>
+#include <map>
 #include "../Colors.hpp"
 
 class BitcoinExchange
 {
+
 public:
 
     static bool databaseToMap(std::ifstream& database);

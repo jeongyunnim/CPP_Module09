@@ -163,12 +163,24 @@ static bool isValidIntValueString(std::string& valueString, int& iValue)
 	return (true);
 }
 
+static double searchTargetValue(std::map<std::string, double>& _exchangeRateData, std::string date)
+{
+	std::map<std::string, double>::iterator it = std::lower_bound(_exchangeRateData.begin(), _exchangeRateData.end(), date);
+
+	std::cout << "date: " << date << "[map] <" << it->first << "> -> " << it->second << std::endl;
+	// if (it->first == date)
+	// 	return (it->second);
+	// else (it->first == date)
+	return (it->second);
+}
+
 static bool convertExchanges(std::string& oneLine, std::map<std::string, double>& _exchangeRateData)
 {
 	std::stringstream	oneLineStream(oneLine);
 	std::string 		dateString;
 	std::string 		valueString;
 	int					iValue;
+	double				result;
 
 	std::getline(oneLineStream, dateString, ',');
 	if (isValidDate(dateString) == false)
@@ -182,7 +194,8 @@ static bool convertExchanges(std::string& oneLine, std::map<std::string, double>
 		std::cout << valueString << ": ";
 		return (false);
 	}
-
+	result = searchTargetValue(_exchangeRateData, dateString) * iValue;
+	//찾기 -> 밸류 값 곱해서 출력하기.
 	if (oneLineStream.eof() == false || oneLineStream.fail())
 		return (false);
 	return (true);
@@ -201,21 +214,18 @@ void	BitcoinExchange::printExchangeRates(std::ifstream& input)
 	std::getline(input, oneLineString);
 	while (input.eof() == false || input.fail() == false)
 	{
-		if (convertExchanges(oneLineString, _exchangeRateData) == false)
-		{
+		if (_exchangeRateData.size() == 0)
+			std::cout << Colors::Red << "Error: database is empty =>" << oneLineString << Colors::Reset << std::endl;
+		else if (convertExchanges(oneLineString, _exchangeRateData) == false)
 			std::cout << Colors::Red << "Error: bad input =>" << oneLineString << Colors::Reset << std::endl;
-			return ;
-		}
 		oneLineString.clear();
 		std::getline(input, oneLineString);
 	}
-	//찾기 -> 밸류 값 곱해서 출력하기.
 	if (input.eof() == false && input.fail() == true)
 	{
 		std::cout << Colors::Red << "Error: file read error" << Colors::Reset << std::endl;
 		return ;
 	}
-	return ;
 }
 
 bool BitcoinExchange::parsingInputFile(const std::string& fileName)
@@ -229,4 +239,5 @@ bool BitcoinExchange::parsingInputFile(const std::string& fileName)
 	}
 	printExchangeRates(input);
 	input.close();
+	return (true);
 }

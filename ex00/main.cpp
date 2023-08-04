@@ -8,6 +8,8 @@ int main(int argc, char *argv[])
 		return (1);
 	}
 	BitcoinExchange::parsingDataFile("data.csv");
-	// BitcoinExchange::parsingInputFile(argv[1]);
+	// if (BitcoinExchange::parsingInputFile(argv[1]) == false)
+		// return (1);
+
 	return (0);
 }
