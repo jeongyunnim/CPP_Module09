@@ -1,5 +1,4 @@
 #include "BitcoinExchange.hpp"
-// 2008/08/18일 이전 예외처리
 
 std::map<std::string, double> BitcoinExchange::_exchangeRateData;
 
@@ -12,7 +11,7 @@ static int leapYearFeb(int year) {
 	return (28);
 }
 
-static bool isValidPairOfDate(int year, int month, int day)
+static bool isValidMonthOfDate(int year, int month, int day)
 {
 	int maxDay;
 
@@ -40,15 +39,24 @@ static bool	isValidDate(const std::string& date)
 	int	day;
 	char dashFlag1;
 	char dashFlag2;
-	
+
 	dateStream >> year >> dashFlag1 >> month >> dashFlag2 >> day;
 	if (dashFlag1 != '-' || dashFlag2 != '-')
+	{
+		std::cout << dashFlag1 << dashFlag2 << std::endl;
 		return (false);
+	}
 	if (dateStream.eof() == false || dateStream.fail() || year < 2008 || (month < 1 || 12 < month) || (day < 1 || day > 31) || \
 		(year == 2008 && month < 8) || (year == 2008 && month < 8 && day < 18))
+	{
+		std::cout << dateStream.str() << std::endl;
 		return (false);
-	if (isValidPairOfDate(year, month, day) == false)
+	}
+	if (isValidMonthOfDate(year, month, day) == false)
+	{
+		std::cout << dateStream.str() << std::endl;
 		return (false);
+	}
 	return (true);
 }
 
@@ -61,7 +69,7 @@ static bool duplicateCheck(const std::string& date, const std::map<std::string, 
 	return (false);
 }
 
-static bool isValidValueString(std::string& valueString, double& dValue)
+static bool isValidDoubleValueString(std::string& valueString, double& dValue)
 {
 	std::stringstream valueStream(valueString);
 	valueStream >> dValue;
@@ -70,42 +78,46 @@ static bool isValidValueString(std::string& valueString, double& dValue)
 	return (true);
 }
 
+static bool isValidOneLine(std::string& oneLine, std::map<std::string, double>& _exchangeRateData)
+{
+	std::stringstream	oneLineStream(oneLine);
+	std::string 		dateString;
+	std::string 		valueString;
+	double				dValue;
+
+	std::getline(oneLineStream, dateString, ',');
+	if (isValidDate(dateString) == false)
+		return (false);
+	std::getline(oneLineStream, valueString, '\n');
+	if (isValidDoubleValueString(valueString, dValue) == false)
+		return (false);
+	if (duplicateCheck(dateString, _exchangeRateData) == false)
+		return (false);
+	_exchangeRateData.insert(std::pair<std::string, double>(dateString, dValue));
+	if (oneLineStream.eof() == false || oneLineStream.fail())
+		return (false);
+	return (true);
+}
+
 bool BitcoinExchange::databaseToMap(std::ifstream& database)
 {
-	std::string dateString;
-	std::string valueString;
-	double		dValue;
+	std::string oneLineString;
 
-	std::getline(database, dateString, '\n');
-	if (dateString != "date,exchange_rate")
+	std::getline(database, oneLineString, '\n');
+	if (oneLineString != "date,exchange_rate")
 	{
-		std::cout << dateString << ": ";
+		std::cout << oneLineString << ": ";
 		return (false);
 	}
+	std::getline(database, oneLineString);
 	while (database.eof() == false || database.fail() == false)
 	{
-		std::getline(database, dateString, ',');
-		if (isValidDate(dateString) == false)
-		{
-			if (dateString.empty() == true)
-				return (true);
-			std::cout << dateString << ": ";
+		if (isValidOneLine(oneLineString, _exchangeRateData) == false)
 			return (false);
-		}
-		std::getline(database, valueString, '\n');
-		if (isValidValueString(valueString, dValue) == false)
-		{
-			std::cout << valueString << ": ";
-			return (false);
-		}
-		if (duplicateCheck(dateString, _exchangeRateData) == false)
-		{
-			std::cout << dateString << ": ";
-			return (false);
-		}
-		_exchangeRateData.insert(std::pair<std::string, double>(dateString, dValue));
+		oneLineString.clear();
+		std::getline(database, oneLineString);
 	}
-	if (database.fail() == 1)
+	if (database.eof() == false && database.fail() == true)
 		return (false);
 	return (true);
 }
@@ -142,12 +154,79 @@ bool BitcoinExchange::parsingDataFile(const std::string& fileName)
 	return (true);
 }
 
-// bool BitcoinExchange::parsingInputFile(const std::string& fileName)
-// {
+static bool isValidIntValueString(std::string& valueString, int& iValue)
+{
+	std::stringstream valueStream(valueString);
+	valueStream >> iValue;
+	if (valueStream.eof() == false || valueStream.fail() || iValue < 0 || 1000 < iValue)
+		return (false);
+	return (true);
+}
 
-// }
+static bool convertExchanges(std::string& oneLine, std::map<std::string, double>& _exchangeRateData)
+{
+	std::stringstream	oneLineStream(oneLine);
+	std::string 		dateString;
+	std::string 		valueString;
+	int					iValue;
 
-// void BitcoinExchange::printExchangeRate(const std::string& date, const std::string& value)
-// {
+	std::getline(oneLineStream, dateString, ',');
+	if (isValidDate(dateString) == false)
+	{
+		std::cout << dateString << ": ";
+		return (false);
+	}
+	std::getline(oneLineStream, valueString, '\n');
+	if (isValidIntValueString(valueString, iValue) == false)
+	{
+		std::cout << valueString << ": ";
+		return (false);
+	}
 
-// }
+	if (oneLineStream.eof() == false || oneLineStream.fail())
+		return (false);
+	return (true);
+}
+
+void	BitcoinExchange::printExchangeRates(std::ifstream& input)
+{
+	std::string oneLineString;
+
+	std::getline(input, oneLineString, '\n');
+	if (oneLineString != "date | value")
+	{
+		std::cout << Colors::Red << "Error: bad input =>" << oneLineString << Colors::Reset << std::endl;
+		return ;
+	}
+	std::getline(input, oneLineString);
+	while (input.eof() == false || input.fail() == false)
+	{
+		if (convertExchanges(oneLineString, _exchangeRateData) == false)
+		{
+			std::cout << Colors::Red << "Error: bad input =>" << oneLineString << Colors::Reset << std::endl;
+			return ;
+		}
+		oneLineString.clear();
+		std::getline(input, oneLineString);
+	}
+	//찾기 -> 밸류 값 곱해서 출력하기.
+	if (input.eof() == false && input.fail() == true)
+	{
+		std::cout << Colors::Red << "Error: file read error" << Colors::Reset << std::endl;
+		return ;
+	}
+	return ;
+}
+
+bool BitcoinExchange::parsingInputFile(const std::string& fileName)
+{
+	std::ifstream input(fileName);
+
+	if (input.is_open() == false)
+	{
+		std::cout << Colors::Red << "Error: input file open error." << Colors::Reset << std::endl;
+		return (false);
+	}
+	printExchangeRates(input);
+	input.close();
+}
