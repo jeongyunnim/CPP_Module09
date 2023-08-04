@@ -42,21 +42,12 @@ static bool	isValidDate(const std::string& date)
 
 	dateStream >> year >> dashFlag1 >> month >> dashFlag2 >> day;
 	if (dashFlag1 != '-' || dashFlag2 != '-')
-	{
-		std::cout << dashFlag1 << dashFlag2 << std::endl;
 		return (false);
-	}
 	if (dateStream.eof() == false || dateStream.fail() || year < 2008 || (month < 1 || 12 < month) || (day < 1 || day > 31) || \
 		(year == 2008 && month < 8) || (year == 2008 && month < 8 && day < 18))
-	{
-		std::cout << dateStream.str() << std::endl;
 		return (false);
-	}
 	if (isValidMonthOfDate(year, month, day) == false)
-	{
-		std::cout << dateStream.str() << std::endl;
 		return (false);
-	}
 	return (true);
 }
 
@@ -154,12 +145,24 @@ bool BitcoinExchange::parsingDataFile(const std::string& fileName)
 	return (true);
 }
 
-static bool isValidIntValueString(std::string& valueString, double& dValue)
+static bool isValidIntValueString(std::string valueString, double& dValue)
 {
 	std::stringstream valueStream(valueString);
+	int dotFlag = 0;
 
+	for (std::string::iterator it = valueString.begin(); it != valueString.end(); it++)
+	{
+		if (std::isdigit(*it) == true)
+			continue ;
+		else if (dotFlag == 0 && *it == '.')
+			continue ;
+		else
+		{
+			std::cout << Colors::Red << "Error: invalid input => " << valueString << Colors::Reset << std::endl;
+			return (false);
+		}
+	}
 	valueStream >> dValue;
-	// whitespace를 어떻게든 처리해야 한다.
 	if (valueStream.eof() == false)
 	{
 		std::cout << Colors::Red << "Error: invalid input => " << valueString << Colors::Reset << std::endl;
@@ -223,7 +226,7 @@ static void convertExchanges(std::string& oneLine, std::map<std::string, double>
 	if (isValidIntValueString(valueString, dValue) == false)
 		return ;
 	result = searchTargetValue(_exchangeRateData, dateString) * dValue;
-	std::cout << "date: " << dateString << " -> " << result << std::endl;
+	std::cout << Colors::Cyan << "Date[" << dateString << "]: " << Colors::Reset << result << std::endl;
 	if (oneLineStream.eof() == false || oneLineStream.fail())
 		std::cout << Colors::Red << "Error: file stream error" << Colors::Reset << std::endl;
 }
