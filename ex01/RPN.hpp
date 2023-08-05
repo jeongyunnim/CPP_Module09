@@ -16,6 +16,9 @@ public:
 
     static bool pushArguments(char *argv[]);
     static bool readOneArg(std::string arg);
+    static bool argToStack(const std::string& oneExpression);
+    static bool performOperations(int sign);
+    static bool printResult(void);
 
 private:
 
@@ -24,7 +27,7 @@ private:
     RPN& operator=(const RPN& rhs);
     RPN(const RPN& obj);
 
-    static std::stack<std::string> _expressions;
+    static std::stack<int>  _numStack;
 
 };
 

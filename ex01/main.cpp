@@ -9,5 +9,7 @@ int main(int argc, char *argv[])
 	}
 	if (RPN::pushArguments(argv) == false)
 		return (1);
+	if (RPN::printResult() == false)
+		return (1);
 	return (0);
 }
