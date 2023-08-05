@@ -15,13 +15,13 @@ class RPN
 public:
 
     static bool pushArguments(char *argv[]);
-    static bool readOneArg(std::string arg);
-    static bool argToStack(const std::string& oneExpression);
-    static bool performOperations(int sign);
     static bool printResult(void);
 
 private:
 
+    static bool readOneArg(std::string arg);
+    static bool argToStack(const std::string& oneExpression);
+    static bool performOperations(int sign);
     static bool meetSign(int sign);
     static bool meetNumber(const std::string& numString);
 

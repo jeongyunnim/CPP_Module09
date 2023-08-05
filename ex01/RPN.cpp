@@ -95,7 +95,6 @@ bool RPN::readOneArg(std::string arg)
 	std::stringstream argStream(arg);
 	std::string oneExpression;
 
-	std::cout << "check one arg: " << arg << std::endl;
 	while (1)
 	{
 		std::getline(argStream, oneExpression, ' ');
