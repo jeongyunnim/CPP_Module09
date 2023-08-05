@@ -21,57 +21,72 @@ bool	RPN::performOperations(int sign)
 		result = lhs * rhs;
 	else
 		result = lhs / rhs;
-	std::cout << lhs << ' ' << static_cast<char>(sign) << ' ' << rhs <<  " = " << result << std::endl;
+	/* print RPN processes */
+	// std::cout << lhs << ' ' << static_cast<char>(sign) << ' ' << rhs <<  " = " << result << std::endl;
 	if (result > INT32_MAX)
+		return (false);
+	_numStack.push(result);
+	return (true);
+}
+
+static	int	printErrorInputReturnFalse(const std::string& input)
+{
+	std::cout << Colors::RedString("Error: invalid input: ") << input << std::endl;
+	return (false);
+}
+
+bool	RPN::meetSign(int sign)
+{
+	if (_numStack.size() < 2)
 	{
-		std::cout << Colors::RedString("Error: int overflow") << std::endl;
+		std::cout << Colors::RedString("Error: expression pairs not matched") << std::endl;
 		return (false);
 	}
-	_numStack.push(result);
+	else if (performOperations(sign) == false)
+	{
+		std::cout << Colors::RedString("Error: int overflow") << std::endl;
+		return (false);	
+	}
+	return (true);
+}
+
+bool	RPN::meetNumber(const std::string& numString)
+{
+	int		iValue;
+
+	for (std::string::const_iterator cit = numString.begin(); cit != numString.end(); cit++)
+	{
+		if (cit != numString.begin() && std::isdigit(*cit) == false)
+			return (printErrorInputReturnFalse(numString));
+	}
+	iValue = std::atoi(numString.c_str());
+	if (iValue < 0 || 10 < iValue)
+	{
+		std::cout << Colors::RedString("Error: argument range is {0 .. 10} ") << numString << std::endl;
+		return (false);
+	}
+	_numStack.push(iValue);
 	return (true);
 }
 
 bool RPN::argToStack(const std::string& oneExpression)
 {
-	int		iValue;
 
 	if (oneExpression.empty() == true)
-	{
-		std::cout << Colors::RedString("Error: invalid input: ") << oneExpression << std::endl;
-		return (false);
-	}
+		return (printErrorInputReturnFalse(oneExpression));
 	else if (oneExpression.size() == 1 && \
 			(oneExpression[0] == '+' || oneExpression[0] == '-' || oneExpression[0] == '/' || oneExpression[0] == '*'))
 	{
-		if (_numStack.size() < 2)
-		{
-			std::cout << Colors::RedString("Error: expression pairs not matched") << std::endl;
+		if (meetSign(oneExpression[0]) == false)
 			return (false);
-		}
-		else if (performOperations(oneExpression[0]) == false)
-			return (false);	
-		return (true);
 	}
 	else if ((oneExpression[0] != '+') && std::isdigit(oneExpression[0]) == false)
+		return (printErrorInputReturnFalse(oneExpression));
+	else
 	{
-		std::cout << Colors::RedString("Error: invalid input: ") << oneExpression << std::endl;
-		return (false);
-	}
-	for (std::string::const_iterator cit = oneExpression.begin(); cit != oneExpression.end(); cit++)
-	{
-		if (cit != oneExpression.begin() && std::isdigit(*cit) == false)
-		{
-			std::cout << Colors::RedString("Error: invalid input: ") << oneExpression << std::endl;
+		if (meetNumber(oneExpression) == false)
 			return (false);
-		}
 	}
-	iValue = std::atoi(oneExpression.c_str());
-	if (iValue < 0 || 10 < iValue)
-	{
-		std::cout << Colors::RedString("Error: argument range is {0 .. 10} ") << oneExpression << std::endl;
-		return (false);
-	}
-	_numStack.push(iValue);
 	return (true);
 }
 
@@ -114,7 +129,7 @@ bool RPN::printResult(void)
 
 	result = _numStack.top();
 	_numStack.pop();
-	if (_numStack.empty() == false) // 안해도 되는지..?
+	if (_numStack.empty() == false)
 	{
 		std::cout << Colors::RedString("Error: expression pairs not matched") <<std::endl;
 		return (false);
@@ -122,4 +137,3 @@ bool RPN::printResult(void)
 	std::cout << Colors::BoldBlueString("[Result]: ") << result << std::endl;
 	return (true);
 }
-

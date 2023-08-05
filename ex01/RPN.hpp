@@ -22,6 +22,9 @@ public:
 
 private:
 
+    static bool meetSign(int sign);
+    static bool meetNumber(const std::string& numString);
+
     RPN(void);
     ~RPN(void);
     RPN& operator=(const RPN& rhs);
