@@ -80,7 +80,7 @@ bool RPN::argToStack(const std::string& oneExpression)
 		if (meetSign(oneExpression[0]) == false)
 			return (false);
 	}
-	else if ((oneExpression[0] != '+') && std::isdigit(oneExpression[0]) == false)
+	else if ((oneExpression[0] != '+') && (oneExpression[0] != '-') && std::isdigit(oneExpression[0]) == false)
 		return (printErrorInputReturnFalse(oneExpression));
 	else
 	{

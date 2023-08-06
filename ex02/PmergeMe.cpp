@@ -3,6 +3,7 @@
 std::deque<int> PmergeMe::_argsDeque;
 std::list<int> PmergeMe::_argsList;
 
+/* argument parsing */
 void PmergeMe::printArguments(void)
 {
 	std::cout << Colors::BoldMagentaString("[original sequence]") << std::endl;
@@ -43,7 +44,7 @@ bool PmergeMe::argToContainer(const std::string& oneExpression)
 {
 	if (oneExpression.empty() == true)
 		return (printErrorInputReturnFalse(oneExpression));
-	else if ((oneExpression[0] != '+') && std::isdigit(oneExpression[0]) == false)
+	else if ((oneExpression[0] != '+') && (oneExpression[0] != '-') && std::isdigit(oneExpression[0]) == false)
 		return (printErrorInputReturnFalse(oneExpression));
 	else
 	{
@@ -82,3 +83,36 @@ bool PmergeMe::pushArguments(char *argv[])
 	}
 	return (true);
 }
+
+/* merge sort*/
+
+size_t mergeSorting(std::deque<int>& target) // reference로 주고 싶은데 어떻게 할지 일단 고민 스택에 쌓이는 거라서 참조로 넘겨줘도 되는지 궁금
+{
+	std::deque<int> a(target.size() / 2);
+	std::deque<int> b(target.size() - a.size());
+	int				range = 0;
+
+	for (std::deque<int>::iterator it = target.begin(); it != target.end(); it++)
+	{
+		if (range < target.size() / 2)
+			a.push_back(*it);
+		else
+			b.push_back(*it);
+		range++;
+	}
+	/* 
+	1. 분할
+	2. 최소단위에 이르르면 두 놈을 비교하여 insert
+	3. 병합 (바이너리 서치로 찾아서 삽입 정렬)
+	*/
+	size_t	range = target.size();
+
+	if (range <= 2)
+	{
+
+	}
+
+	mergeSorting(range / 2);
+}
+
+/* insertion sort + binary search*/

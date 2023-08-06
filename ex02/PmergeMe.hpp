@@ -20,9 +20,11 @@ public:
 
 private:
 
-    static bool readOneArg(std::string arg);
-    static bool argToContainer(const std::string& oneExpression);
-    static bool pushNumber(const std::string& numString);
+    static size_t   mergeSorting(size_t range);
+    static void     insertionSorting(void);
+    static bool     readOneArg(std::string arg);
+    static bool     argToContainer(const std::string& oneExpression);
+    static bool     pushNumber(const std::string& numString);
 
     PmergeMe(void);
     ~PmergeMe(void);
