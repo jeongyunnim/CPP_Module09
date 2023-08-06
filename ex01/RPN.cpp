@@ -20,11 +20,21 @@ bool	RPN::performOperations(int sign)
 	else if (sign == '*')
 		result = lhs * rhs;
 	else
+	{
+		if (rhs == 0)
+		{
+			std::cout << Colors::RedString("Error: divide by zero") << std::endl;
+			return (false);
+		}
 		result = lhs / rhs;
+	}
 	/* print RPN processes */
 	// std::cout << lhs << ' ' << static_cast<char>(sign) << ' ' << rhs <<  " = " << result << std::endl;
 	if (result > INT32_MAX)
+	{
+		std::cout << Colors::RedString("Error: int overflow") << std::endl;
 		return (false);
+	}
 	_numStack.push(result);
 	return (true);
 }
@@ -44,7 +54,6 @@ bool	RPN::meetSign(int sign)
 	}
 	else if (performOperations(sign) == false)
 	{
-		std::cout << Colors::RedString("Error: int overflow") << std::endl;
 		return (false);	
 	}
 	return (true);
