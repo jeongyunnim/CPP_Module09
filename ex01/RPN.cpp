@@ -137,11 +137,6 @@ bool RPN::printResult(void)
 
 	result = _numStack.top();
 	_numStack.pop();
-	if (_numStack.empty() == false)
-	{
-		std::cout << Colors::RedString("Error: expression pairs not matched") <<std::endl;
-		return (false);
-	}
 	std::cout << Colors::BoldBlueString("[Result]: ") << result << std::endl;
 	return (true);
 }
