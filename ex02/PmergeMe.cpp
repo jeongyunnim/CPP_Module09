@@ -84,8 +84,7 @@ bool PmergeMe::pushArguments(char *argv[])
 	return (true);
 }
 
-/* merge sort*/
-
+/* FJ sort*/
 static void	initPairDeque(std::deque<int>& src, std::deque<std::pair<int , int> >& mainChain, int& straggler)
 {
 	if (src.size() % 2 == 1)
@@ -99,65 +98,52 @@ static void	initPairDeque(std::deque<int>& src, std::deque<std::pair<int , int> 
 	}
 }
 
-void	merge(PmergeMe::intPairDeque& arrangedChain, PmergeMe::intPairDeque& mainChain, int left, int middle, int right)
+int	findJacobsthalNum(int index)
 {
-	int	leftIdx = left;
-	int	rightIdx = middle + 1;
-	int	chainIdx = left;
+	if (index == 0)
+		return (1);
+	else if (index == 1)
+		return (3);
+	return (findJacobsthalNum(index - 1) + 2 * findJacobsthalNum(index - 2));
+}
 
-	std::cout << "<left, middle, right>: " << left << ", " << middle << ", " <<right << std::endl;
-	for (int i = left; i <= right; i++)
+static void binarySearch(std::deque<int>& result, std::pair<int,int>& targetValue)
+{
+	int	left = 0;
+	int right = 0; // binary search 의 right 값을 어떻게 잡아야할 지 모르겠다.
+}
+
+void	PmergeMe::sortingPendingchain(PmergeMe::intPairDeque& mainChain, int straggler)
+{
+	std::deque<int> result;
+	size_t 			i = 0;
+	int	 			jacobsthal = 1;
+
+
+	for (PmergeMe::intPairDeque::iterator it = mainChain.begin(); it != mainChain.end(); it++)
 	{
-		std::cout << i << ": " << mainChain[i].first << ", " << mainChain[i].second << std::endl;
+		result.push_back(it->first);
 	}
-	std::cout << "\n\n" << std::endl;
-	while (leftIdx <= middle && rightIdx <= right)
+	while (i < mainChain.size())
 	{
-		if (mainChain[leftIdx].first <= mainChain[rightIdx].first)
+		if (i == 0)
 		{
-			arrangedChain[chainIdx] = mainChain[leftIdx];
-			leftIdx += 1;
+			result.push_front(mainChain[i].second);
 		}
 		else
 		{
-			arrangedChain[chainIdx] = mainChain[rightIdx];
-			rightIdx += 1;
-		}
-		chainIdx += 1;
-	}
-	if (leftIdx > middle)
-	{
-		for (; rightIdx <= right; rightIdx++)
-		{
-			arrangedChain[chainIdx] = mainChain[rightIdx];
-			chainIdx += 1;
+			/* 다음 야스콥탈 수를 가져와야 함. 그 뒤에 전 야스콥탈 수보다 적게 가져가야 함. */
+			i = findJacobsthalNum(jacobsthal) - 1;
+			if (i >= mainChain.size())
+				i = mainChain.size() - 1;
+			for (int j = i; j >= findJacobsthalNum(jacobsthal - 1); j--)
+			{
+				binarySearch(result, mainChain[j]);
+			}
+			i++;
 		}
 	}
-	else
-	{
-		for (; leftIdx <= middle; leftIdx++)
-		{
-			arrangedChain[chainIdx] = mainChain[leftIdx];
-			chainIdx += 1;
-		}
-	}
-	int i = 0;
-	for (PmergeMe::intPairDeque::iterator it = arrangedChain.begin(); it != arrangedChain.end(); it++)
-	{
-		std::cout << i << ": " << it->first << ", " << it->second << std::endl;
-		i++;
-	}
-}
-
-void mergeSort(PmergeMe::intPairDeque& arrangedChain, PmergeMe::intPairDeque& mainChain, int leftIdx, int rightIdx)
-{
-	if (leftIdx < rightIdx)
-	{
-		int middle = (leftIdx + rightIdx) / 2;
-		mergeSort(arrangedChain, mainChain, leftIdx, middle);
-		mergeSort(arrangedChain, mainChain, middle + 1, rightIdx);
-		merge(arrangedChain, mainChain, leftIdx, middle, rightIdx);
-	}
+	if (straggler >= 0)
 }
 
 void PmergeMe::mergeInsertionSorting(void)
@@ -167,15 +153,18 @@ void PmergeMe::mergeInsertionSorting(void)
 	int				straggler = -1;
 
 	initPairDeque(_argsDeque, mainChain, straggler);
-	//sort using merge insert
-	PmergeMe::intPairDeque	arrangedMainChain(mainChain.size());
-	mergeSort(arrangedMainChain, mainChain, 0, mainChain.size() - 1);
-	// int i = 0;
-	// for (PmergeMe::intPairDeque::iterator it = arrangedMainChain.begin(); it != arrangedMainChain.end(); it++)
-	// {
-	// 	i++;
-	// 	std::cout << i << ": " << it->first << ", " << it->second << std::endl;
-	// }
+	std::sort(mainChain.begin(), mainChain.end());
+	//sort pendingchan.
+	sortingPendingchain(mainChain, straggler);
+
+
+
+	int i = 0;
+	for (PmergeMe::intPairDeque::iterator it = mainChain.begin(); it != mainChain.end(); it++)
+	{
+		i++;
+		std::cout << i << ": " << it->first << ", " << it->second << std::endl;
+	}
 }
 
 /* insertion sort + binary search*/

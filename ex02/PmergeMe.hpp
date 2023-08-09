@@ -19,8 +19,8 @@ public:
 
 	static bool pushArguments(char *argv[]);
 	static void printArguments(void);
-	static void		mergeInsertionSorting(void);
-
+	static void	mergeInsertionSorting(void);
+	static void sortingPendingchain(PmergeMe::intPairDeque& mainChain, int straggler);
 private:
 	
 
