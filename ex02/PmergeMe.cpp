@@ -88,31 +88,25 @@ bool PmergeMe::pushArguments(char *argv[])
 
 size_t mergeSorting(std::deque<int>& target) // reference로 주고 싶은데 어떻게 할지 일단 고민 스택에 쌓이는 거라서 참조로 넘겨줘도 되는지 궁금
 {
-	std::deque<int> a(target.size() / 2);
-	std::deque<int> b(target.size() - a.size());
-	int				range = 0;
+	//convert pair deque
+	std::deque<std::pair<int , int>>	mainChain;
+	int									straggler = -1;
 
-	for (std::deque<int>::iterator it = target.begin(); it != target.end(); it++)
+	for (std::deque<int>::iterator it = target.begin(); it + 1 != target.end(); it += 2)
 	{
-		if (range < target.size() / 2)
-			a.push_back(*it);
+		if (*it > *(it + 1))
+			mainChain.push_back(std::pair<int, int>(*it, *(it + 1)));
 		else
-			b.push_back(*it);
-		range++;
+			mainChain.push_back(std::pair<int, int>(*(it + 1), *it));
+		if (it == target.end())
+		{
+			straggler = *it;
+			break ;
+		}
 	}
-	/* 
-	1. 분할
-	2. 최소단위에 이르르면 두 놈을 비교하여 insert
-	3. 병합 (바이너리 서치로 찾아서 삽입 정렬)
-	*/
-	size_t	range = target.size();
+	//sort using merge insert
+	
 
-	if (range <= 2)
-	{
-
-	}
-
-	mergeSorting(range / 2);
 }
 
 /* insertion sort + binary search*/
