@@ -110,7 +110,7 @@ int	findJacobsthalNum(int index)
 static void binarySearch(std::deque<int>& result, std::pair<int,int>& targetValue)
 {
 	int	left = 0;
-	int right = 0; // binary search 의 right 값을 어떻게 잡아야할 지 모르겠다.
+	int right = std::find(result.begin, result.); // binary search 의 right 값을 어떻게 잡아야할 지 모르겠다.
 }
 
 void	PmergeMe::sortingPendingchain(PmergeMe::intPairDeque& mainChain, int straggler)
