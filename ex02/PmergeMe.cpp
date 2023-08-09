@@ -86,27 +86,96 @@ bool PmergeMe::pushArguments(char *argv[])
 
 /* merge sort*/
 
-size_t mergeSorting(std::deque<int>& target) // reference로 주고 싶은데 어떻게 할지 일단 고민 스택에 쌓이는 거라서 참조로 넘겨줘도 되는지 궁금
+static void	initPairDeque(std::deque<int>& src, std::deque<std::pair<int , int> >& mainChain, int& straggler)
 {
-	//convert pair deque
-	std::deque<std::pair<int , int>>	mainChain;
-	int									straggler = -1;
-
-	for (std::deque<int>::iterator it = target.begin(); it + 1 != target.end(); it += 2)
+	if (src.size() % 2 == 1)
+		straggler = *src.rbegin();
+	for (std::deque<int>::iterator it = src.begin(); it + 1 != src.end() && it != src.end(); it += 2)
 	{
 		if (*it > *(it + 1))
 			mainChain.push_back(std::pair<int, int>(*it, *(it + 1)));
 		else
 			mainChain.push_back(std::pair<int, int>(*(it + 1), *it));
-		if (it == target.end())
+	}
+}
+
+void	merge(PmergeMe::intPairDeque& arrangedChain, PmergeMe::intPairDeque& mainChain, int left, int middle, int right)
+{
+	int	leftIdx = left;
+	int	rightIdx = middle + 1;
+	int	chainIdx = left;
+
+	std::cout << "<left, middle, right>: " << left << ", " << middle << ", " <<right << std::endl;
+	for (int i = left; i <= right; i++)
+	{
+		std::cout << i << ": " << mainChain[i].first << ", " << mainChain[i].second << std::endl;
+	}
+	std::cout << "\n\n" << std::endl;
+	while (leftIdx <= middle && rightIdx <= right)
+	{
+		if (mainChain[leftIdx].first <= mainChain[rightIdx].first)
 		{
-			straggler = *it;
-			break ;
+			arrangedChain[chainIdx] = mainChain[leftIdx];
+			leftIdx += 1;
+		}
+		else
+		{
+			arrangedChain[chainIdx] = mainChain[rightIdx];
+			rightIdx += 1;
+		}
+		chainIdx += 1;
+	}
+	if (leftIdx > middle)
+	{
+		for (; rightIdx <= right; rightIdx++)
+		{
+			arrangedChain[chainIdx] = mainChain[rightIdx];
+			chainIdx += 1;
 		}
 	}
-	//sort using merge insert
-	
+	else
+	{
+		for (; leftIdx <= middle; leftIdx++)
+		{
+			arrangedChain[chainIdx] = mainChain[leftIdx];
+			chainIdx += 1;
+		}
+	}
+	int i = 0;
+	for (PmergeMe::intPairDeque::iterator it = arrangedChain.begin(); it != arrangedChain.end(); it++)
+	{
+		std::cout << i << ": " << it->first << ", " << it->second << std::endl;
+		i++;
+	}
+}
 
+void mergeSort(PmergeMe::intPairDeque& arrangedChain, PmergeMe::intPairDeque& mainChain, int leftIdx, int rightIdx)
+{
+	if (leftIdx < rightIdx)
+	{
+		int middle = (leftIdx + rightIdx) / 2;
+		mergeSort(arrangedChain, mainChain, leftIdx, middle);
+		mergeSort(arrangedChain, mainChain, middle + 1, rightIdx);
+		merge(arrangedChain, mainChain, leftIdx, middle, rightIdx);
+	}
+}
+
+void PmergeMe::mergeInsertionSorting(void)
+{
+	//convert pair deque
+	PmergeMe::intPairDeque	mainChain;
+	int				straggler = -1;
+
+	initPairDeque(_argsDeque, mainChain, straggler);
+	//sort using merge insert
+	PmergeMe::intPairDeque	arrangedMainChain(mainChain.size());
+	mergeSort(arrangedMainChain, mainChain, 0, mainChain.size() - 1);
+	// int i = 0;
+	// for (PmergeMe::intPairDeque::iterator it = arrangedMainChain.begin(); it != arrangedMainChain.end(); it++)
+	// {
+	// 	i++;
+	// 	std::cout << i << ": " << it->first << ", " << it->second << std::endl;
+	// }
 }
 
 /* insertion sort + binary search*/

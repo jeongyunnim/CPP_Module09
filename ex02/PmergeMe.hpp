@@ -15,24 +15,27 @@ class PmergeMe
 
 public:
 
-    static bool pushArguments(char *argv[]);
-    static void printArguments(void);
+	typedef	std::deque<std::pair<int, int> >	intPairDeque;
+
+	static bool pushArguments(char *argv[]);
+	static void printArguments(void);
+	static void		mergeInsertionSorting(void);
 
 private:
+	
 
-    static size_t   mergeSorting(size_t range);
-    static void     insertionSorting(void);
-    static bool     readOneArg(std::string arg);
-    static bool     argToContainer(const std::string& oneExpression);
-    static bool     pushNumber(const std::string& numString);
+	static void			insertionSorting(void);
+	static bool			readOneArg(std::string arg);
+	static bool			argToContainer(const std::string& oneExpression);
+	static bool			pushNumber(const std::string& numString);
 
-    PmergeMe(void);
-    ~PmergeMe(void);
-    PmergeMe& operator=(const PmergeMe& rhs);
-    PmergeMe(const PmergeMe& obj);
+	PmergeMe(void);
+	~PmergeMe(void);
+	PmergeMe& operator=(const PmergeMe& rhs);
+	PmergeMe(const PmergeMe& obj);
 
-    static std::deque<int> _argsDeque;
-    static std::list<int> _argsList;
+	static std::deque<int> _argsDeque;
+	static std::list<int> _argsList;
 
 };
 

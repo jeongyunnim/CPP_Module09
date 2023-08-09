@@ -10,6 +10,7 @@ int main(int argc, char *argv[])
 	if (PmergeMe::pushArguments(argv) == false)
 		return (1);
 	PmergeMe::printArguments();
+	PmergeMe::mergeInsertionSorting();
 	/*
 
 	1. 인자 파싱 OK
