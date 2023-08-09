@@ -110,7 +110,50 @@ int	findJacobsthalNum(int index)
 static void binarySearch(std::deque<int>& result, std::pair<int,int>& targetValue)
 {
 	int	left = 0;
-	int right = std::find(result.begin, result.); // binary search 의 right 값을 어떻게 잡아야할 지 모르겠다.
+	int	right = 0;
+
+	for (std::deque<int>::iterator it = result.begin(); it != result.end(); it++)
+	{
+		if (*it == targetValue.first)
+			break ;
+		right += 1;
+	}
+	while (left <= right)
+	{
+		int mid = (left + right) / 2;
+		if (result[mid] == targetValue.second)
+		{
+			result.insert(result.begin() + mid, targetValue.second);
+			return ;
+		}
+		else if (result[mid] < targetValue.second)
+			left = mid + 1;
+		else
+			right = mid - 1;
+	}
+	result.insert(result.begin() + left, targetValue.second);
+
+}
+
+static void binarySearchForOdd(std::deque<int>& result, int& targetValue)
+{
+	int	left = 0;
+	int	right = result.size() - 1;
+
+	while (left <= right)
+	{
+		int mid = (left + right) / 2;
+		if (result[mid] == targetValue)
+		{
+			result.insert(result.begin() + mid, targetValue);
+			return ;
+		}
+		else if (result[mid] < targetValue)
+			left = mid + 1;
+		else
+			right = mid - 1;
+	}
+	result.insert(result.begin() + left, targetValue);
 }
 
 void	PmergeMe::sortingPendingchain(PmergeMe::intPairDeque& mainChain, int straggler)
@@ -119,31 +162,27 @@ void	PmergeMe::sortingPendingchain(PmergeMe::intPairDeque& mainChain, int stragg
 	size_t 			i = 0;
 	int	 			jacobsthal = 1;
 
-
 	for (PmergeMe::intPairDeque::iterator it = mainChain.begin(); it != mainChain.end(); it++)
 	{
 		result.push_back(it->first);
 	}
+	result.push_front(mainChain[i].second);
 	while (i < mainChain.size())
 	{
-		if (i == 0)
+		/* 다음 야스콥탈 수를 가져와야 함. 그 뒤에 전 야스콥탈 수보다 적게 가져가야 함. */
+		i = findJacobsthalNum(jacobsthal) - 1;
+		if (i >= mainChain.size())
+			i = mainChain.size() - 1;
+		for (int j = i; j >= findJacobsthalNum(jacobsthal - 1); j--)
 		{
-			result.push_front(mainChain[i].second);
+			binarySearch(result, mainChain[j]);
 		}
-		else
-		{
-			/* 다음 야스콥탈 수를 가져와야 함. 그 뒤에 전 야스콥탈 수보다 적게 가져가야 함. */
-			i = findJacobsthalNum(jacobsthal) - 1;
-			if (i >= mainChain.size())
-				i = mainChain.size() - 1;
-			for (int j = i; j >= findJacobsthalNum(jacobsthal - 1); j--)
-			{
-				binarySearch(result, mainChain[j]);
-			}
-			i++;
-		}
+		jacobsthal += 1;
+		i++;
 	}
 	if (straggler >= 0)
+		binarySearchForOdd(result, straggler);
+	_argsDeque = result;
 }
 
 void PmergeMe::mergeInsertionSorting(void)
@@ -157,13 +196,9 @@ void PmergeMe::mergeInsertionSorting(void)
 	//sort pendingchan.
 	sortingPendingchain(mainChain, straggler);
 
-
-
-	int i = 0;
-	for (PmergeMe::intPairDeque::iterator it = mainChain.begin(); it != mainChain.end(); it++)
+	for (std::deque<int>::iterator it = _argsDeque.begin(); it != _argsDeque.end(); it++)
 	{
-		i++;
-		std::cout << i << ": " << it->first << ", " << it->second << std::endl;
+		std::cout << *it << ' ';
 	}
 }
 
