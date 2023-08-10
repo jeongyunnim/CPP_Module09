@@ -1,7 +1,23 @@
+#include <sys/time.h>
+#include <iomanip>
 #include "PmergeMe.hpp"
+
+long	getTime(void)
+{
+	struct timeval	tv;
+
+	gettimeofday(&tv, NULL);
+	return (tv.tv_sec * 10000000 + tv.tv_usec);
+}
 
 int main(int argc, char *argv[])
 {
+	long startD;	
+	long endD;	
+
+	long startL;	
+	long endL;
+
 	if (argc < 2)
 	{
 		std::cout << Colors::RedString("Error: argument count error") << std::endl;
@@ -9,20 +25,16 @@ int main(int argc, char *argv[])
 	}
 	if (PmergeMe::pushArguments(argv) == false)
 		return (1);
-	PmergeMe::printArguments();
-	PmergeMe::mergeInsertionSorting();
-	/*
+	PmergeMe::printRawArguments();
+	startD = getTime();
+	PmergeMe::mergeInsertionSortingDeque();
+	endD = getTime();
+	startL = getTime();
+	PmergeMe::mergeInsertionSortingList();
+	endL = getTime();
+	PmergeMe::printArrangedArguments();
 
-	1. 인자 파싱 OK
-	2. 인자 출력
-	3. 정렬된 수 출력
-	4. 컨테이너1 정렬
-	5. 컨테이너1 정렬 확인	<- 시간에 포함시키면 안되는데 
-	6. 컨테이너1 정렬 시간 출력
-	7. 컨테이너2 정렬
-	8. 컨테이너2 정렬 확인
-	9. 컨테이너2 정렬 시간 출력
-
-	*/
+	std::cout << Colors::BoldCyan << "Time to process a range of " << PmergeMe::getRange() << " elements: "<< Colors::Reset << std::fixed << std::setprecision(8) << static_cast<float>(endD - startD) / 1000 << " us" << std::endl;
+	std::cout << Colors::BoldCyan << "Time to process a range of " << PmergeMe::getRange() << " elements: "<< Colors::Reset << std::fixed << std::setprecision(8) << static_cast<float>(endL - startL) / 1000 << " us" << std::endl;
 	return (0);
 }
