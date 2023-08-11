@@ -69,9 +69,9 @@ bool	RPN::meetNumber(const std::string& numString)
 			return (printErrorInputReturnFalse(numString));
 	}
 	iValue = std::atoi(numString.c_str());
-	if (iValue < 0 || 10 < iValue)
+	if (iValue < 0 || 9 < iValue)
 	{
-		std::cout << Colors::RedString("Error: argument range is {0 .. 10} ") << numString << std::endl;
+		std::cout << Colors::RedString("Error: argument range is {0 .. 9} ") << numString << std::endl;
 		return (false);
 	}
 	_numStack.push(iValue);
@@ -82,7 +82,8 @@ bool RPN::argToStack(const std::string& oneExpression)
 {
 
 	if (oneExpression.empty() == true)
-		return (printErrorInputReturnFalse(oneExpression));
+		return (true);
+		// return (printErrorInputReturnFalse(oneExpression));
 	else if (oneExpression.size() == 1 && \
 			(oneExpression[0] == '+' || oneExpression[0] == '-' || oneExpression[0] == '/' || oneExpression[0] == '*'))
 	{
