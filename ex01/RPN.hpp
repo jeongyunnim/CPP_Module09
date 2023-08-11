@@ -14,23 +14,26 @@ class RPN
 
 public:
 
-    static bool pushArguments(char *argv[]);
-    static bool printResult(void);
+    static RPN *getInstance(void);
+    static void cleanUp(void);
+    bool pushArguments(char *argv[]);
+    bool printResult(void);
 
 private:
 
-    static bool readOneArg(std::string arg);
-    static bool argToStack(const std::string& oneExpression);
-    static bool performOperations(int sign);
-    static bool meetSign(int sign);
-    static bool meetNumber(const std::string& numString);
+    bool readOneArg(std::string arg);
+    bool argToStack(const std::string& oneExpression);
+    bool performOperations(int sign);
+    bool meetSign(int sign);
+    bool meetNumber(const std::string& numString);
 
     RPN(void);
     ~RPN(void);
     RPN& operator=(const RPN& rhs);
     RPN(const RPN& obj);
 
-    static std::stack<int>  _numStack;
+    static RPN *_calc;
+    std::stack<int>  _numStack;
 
 };
 

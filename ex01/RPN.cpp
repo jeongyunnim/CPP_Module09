@@ -1,6 +1,23 @@
 #include "RPN.hpp"
 
-std::stack<int> RPN::_numStack;
+RPN *RPN::_calc = NULL;
+
+RPN *RPN::getInstance(void)
+{
+	if (_calc == NULL)
+		_calc = new RPN();
+	return (_calc);
+}
+
+void RPN::cleanUp(void)
+{
+	if (_calc != NULL)
+		delete _calc;
+}
+
+
+RPN::RPN() {}
+RPN::~RPN() {}
 
 bool	RPN::performOperations(int sign)
 {
