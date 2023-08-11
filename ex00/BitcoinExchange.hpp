@@ -14,7 +14,7 @@ class BitcoinExchange
 
 public:
 
-    static BitcoinExchange *getInstence(void);
+    static BitcoinExchange *getInstance(void);
     static void             cleanUp(void);
     bool parsingDataFile(const std::string& fileName);
     bool parsingInputFile(const std::string& fileName);

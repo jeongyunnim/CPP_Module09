@@ -5,7 +5,7 @@ BitcoinExchange::~BitcoinExchange(void) {}
 
 BitcoinExchange* BitcoinExchange::_exchanger = NULL;
 
-BitcoinExchange* BitcoinExchange::getInstence(void)
+BitcoinExchange* BitcoinExchange::getInstance(void)
 {
 	if (_exchanger == NULL)
 		_exchanger = new BitcoinExchange();
@@ -49,32 +49,50 @@ static bool isValidMonthOfDate(int year, int month, int day)
 
 static void	trimWhiteSpace(std::string& target)
 {
+	size_t	start = 0;
+
+	while (start < target.size() && isspace(target[start]) == true)
+	{
+		start += 1;
+	}
+	target.erase(0, start);
+
+	size_t	end = target.size() - 1;
+	while (end > 0 && isspace(target[end]) == true)
+	{
+		end -= 1;
+	}
+	target.erase(end + 1);
+}
+
+static int	stringToInt(std::string& target)
+{
 	for (std::string::iterator it = target.begin(); it != target.end(); it++)
 	{
-		if (std::isspace(*it) == true)
-			target.erase(it);
-		else
-			break ;
+		if (std::isdigit(*it) == false)
+			return (-1) ;
 	}
-	for (std::string::iterator it = target.end() - 1; it != target.begin(); it--)
-	{
-		if (std::isspace(*it) == true)
-			target.erase(it);
-		else
-			break ;
-	}
+	return (std::atoi(target.c_str()));
 }
 
 static bool	isValidDate(const std::string& date)
 {
-	std::stringstream dateStream(date);
-	std::string	year;
-	std::string	month;
-	std::string	day;
-	char dashFlag;
+	std::stringstream	dateStream(date);
+	std::string			numString;
+	int					year;
+	int					month;
+	int					day;
 
-	getline(dateStream, year, '-'); // 하나씩 읽어서 처리해주는 수밖에 없다.
-	if (dateStream.eof() == false || dateStream.fail() || year < 2008 || (month < 1 || 12 < month) || (day < 1 || day > 31) || \
+	std::getline(dateStream, numString, '-');
+	year = stringToInt(numString);
+	numString.clear();
+	std::getline(dateStream, numString, '-');
+	month = stringToInt(numString);
+	numString.clear();
+	std::getline(dateStream, numString, static_cast<char>(EOF));
+	day = stringToInt(numString);
+	numString.clear();
+	if (year < 2008 || (month < 1 || 12 < month) || (day < 1 || day > 31) || \
 		(year == 2008 && month < 8) || (year == 2008 && month < 8 && day < 18))
 		return (false);
 	if (isValidMonthOfDate(year, month, day) == false)
@@ -127,15 +145,19 @@ bool BitcoinExchange::databaseToMap(std::ifstream& database)
 {
 	std::string oneLineString;
 
-	std::getline(database, oneLineString, '\n');
-	if (oneLineString != "date,exchange_rate")
-	{
-		std::cout << oneLineString << ": ";
+	std::getline(database, oneLineString, ',');
+	trimWhiteSpace(oneLineString);
+	if (oneLineString != "date")
 		return (false);
-	}
+	std::getline(database, oneLineString);
+	trimWhiteSpace(oneLineString);
+	if (oneLineString != "exchange_rate")
+		return (false);
+	oneLineString.clear();
 	std::getline(database, oneLineString);
 	while (database.eof() == false || database.fail() == false)
 	{
+		trimWhiteSpace(oneLineString);
 		if (isValidOneLine(oneLineString, _exchangeRateData) == false)
 			return (false);
 		oneLineString.clear();
@@ -237,19 +259,15 @@ static void convertExchanges(std::string& oneLine, std::map<std::string, double>
 	double				dValue;
 	double				result;
 
-	std::getline(oneLineStream, dateString, ' ');
+	std::getline(oneLineStream, dateString, '|');
+	trimWhiteSpace(dateString);
 	if (oneLineStream.eof() || oneLineStream.fail() || isValidDate(dateString) == false)
 	{
 		std::cout << Colors::RedString("Error: bad input => ") << oneLine << std::endl;
 		return ;
 	}
-	std::getline(oneLineStream, delimeterString, ' ');
-	if (oneLineStream.eof() || oneLineStream.fail() || delimeterString != "|")
-	{
-		std::cout << Colors::RedString("Error: bad input => ") << oneLine << std::endl;
-		return ;
-	}
 	std::getline(oneLineStream, valueString, '\n');
+	trimWhiteSpace(valueString);
 	if ((oneLineStream.eof() == false || oneLineStream.fail() == true || valueString.empty() == true))
 	{
 		std::cout << Colors::RedString("Error: bad input => ") << oneLine << std::endl;
@@ -267,8 +285,16 @@ void	BitcoinExchange::printExchangeRates(std::ifstream& input)
 {
 	std::string oneLineString;
 
-	std::getline(input, oneLineString, '\n');
-	if (oneLineString != "date | value")
+	std::getline(input, oneLineString, '|');
+	trimWhiteSpace(oneLineString);
+	if (oneLineString != "date")
+	{
+		std::cout << Colors::RedString("Error: bad input => ") << oneLineString << std::endl;
+		return ;
+	}
+	std::getline(input, oneLineString);
+	trimWhiteSpace(oneLineString);
+	if (oneLineString != "value")
 	{
 		std::cout << Colors::RedString("Error: bad input => ") << oneLineString << std::endl;
 		return ;

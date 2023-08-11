@@ -8,7 +8,7 @@ int main(int argc, char *argv[])
 		return (1);
 	}
 
-	BitcoinExchange *exchanger = BitcoinExchange::getInstence();
+	BitcoinExchange *exchanger = BitcoinExchange::getInstance();
 	if (exchanger->parsingDataFile("data.csv") == false)
 	{
 		BitcoinExchange::cleanUp();
