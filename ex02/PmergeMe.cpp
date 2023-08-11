@@ -80,7 +80,7 @@ bool	PmergeMe::pushNumber(const std::string& numString)
 bool PmergeMe::argToContainer(const std::string& oneExpression)
 {
 	if (oneExpression.empty() == true)
-		return (printErrorInputReturnFalse(oneExpression));
+		return (true);
 	else if ((oneExpression[0] != '+') && (oneExpression[0] != '-') && std::isdigit(oneExpression[0]) == false)
 		return (printErrorInputReturnFalse(oneExpression));
 	else
