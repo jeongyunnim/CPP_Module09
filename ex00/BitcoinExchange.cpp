@@ -1,6 +1,22 @@
 #include "BitcoinExchange.hpp"
 
-std::map<std::string, double> BitcoinExchange::_exchangeRateData;
+BitcoinExchange::BitcoinExchange(void) {}
+BitcoinExchange::~BitcoinExchange(void) {}
+
+BitcoinExchange* BitcoinExchange::_exchanger = NULL;
+
+BitcoinExchange* BitcoinExchange::getInstence(void)
+{
+	if (_exchanger == NULL)
+		_exchanger = new BitcoinExchange();
+	return (_exchanger);
+}
+
+void BitcoinExchange::cleanUp(void)
+{
+	if (_exchanger != NULL)
+		delete _exchanger;
+}
 
 static int leapYearFeb(int year) {
 	if (year % 4 == 0) {
@@ -31,18 +47,33 @@ static bool isValidMonthOfDate(int year, int month, int day)
 	return (true);
 }
 
+static void	trimWhiteSpace(std::string& target)
+{
+	for (std::string::iterator it = target.begin(); it != target.end(); it++)
+	{
+		if (std::isspace(*it) == true)
+			target.erase(it);
+		else
+			break ;
+	}
+	for (std::string::iterator it = target.end() - 1; it != target.begin(); it--)
+	{
+		if (std::isspace(*it) == true)
+			target.erase(it);
+		else
+			break ;
+	}
+}
+
 static bool	isValidDate(const std::string& date)
 {
 	std::stringstream dateStream(date);
-	int	year;
-	int	month;
-	int	day;
-	char dashFlag1;
-	char dashFlag2;
+	std::string	year;
+	std::string	month;
+	std::string	day;
+	char dashFlag;
 
-	dateStream >> year >> dashFlag1 >> month >> dashFlag2 >> day;
-	if (dashFlag1 != '-' || dashFlag2 != '-')
-		return (false);
+	getline(dateStream, year, '-'); // 하나씩 읽어서 처리해주는 수밖에 없다.
 	if (dateStream.eof() == false || dateStream.fail() || year < 2008 || (month < 1 || 12 < month) || (day < 1 || day > 31) || \
 		(year == 2008 && month < 8) || (year == 2008 && month < 8 && day < 18))
 		return (false);
@@ -77,9 +108,11 @@ static bool isValidOneLine(std::string& oneLine, std::map<std::string, double>& 
 	double				dValue;
 
 	std::getline(oneLineStream, dateString, ',');
+	trimWhiteSpace(dateString);
 	if (isValidDate(dateString) == false)
 		return (false);
 	std::getline(oneLineStream, valueString, '\n');
+	trimWhiteSpace(valueString);
 	if (isValidDoubleValueString(valueString, dValue) == false)
 		return (false);
 	if (duplicateCheck(dateString, _exchangeRateData) == false)
@@ -141,7 +174,6 @@ bool BitcoinExchange::parsingDataFile(const std::string& fileName)
 		return (false);
 	}
 	database.close();
-	// printDatabaseMap(_exchangeRateData);
 	return (true);
 }
 

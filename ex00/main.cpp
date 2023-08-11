@@ -7,9 +7,19 @@ int main(int argc, char *argv[])
 		std::cout << "Error: argument count error" << std::endl;
 		return (1);
 	}
-	BitcoinExchange::parsingDataFile("data.csv");
-	if (BitcoinExchange::parsingInputFile(argv[1]) == false)
+
+	BitcoinExchange *exchanger = BitcoinExchange::getInstence();
+	if (exchanger->parsingDataFile("data.csv") == false)
+	{
+		BitcoinExchange::cleanUp();
 		return (1);
+	}
+	if (exchanger->parsingInputFile(argv[1]) == false)
+	{
+		BitcoinExchange::cleanUp();
+		return (1);
+	}
+		BitcoinExchange::cleanUp();
 
 	return (0);
 }

@@ -14,10 +14,10 @@ class BitcoinExchange
 
 public:
 
-    static bool databaseToMap(std::ifstream& database);
-    static bool parsingDataFile(const std::string& fileName);
-    static bool parsingInputFile(const std::string& fileName);
-    static void printExchangeRates(std::ifstream& input);
+    static BitcoinExchange *getInstence(void);
+    static void             cleanUp(void);
+    bool parsingDataFile(const std::string& fileName);
+    bool parsingInputFile(const std::string& fileName);
 
 private:
 
@@ -26,8 +26,11 @@ private:
     BitcoinExchange& operator=(const BitcoinExchange& rhs);
     BitcoinExchange(const BitcoinExchange& obj);
 
-    static std::map<std::string, double> _exchangeRateData;
-
+    static BitcoinExchange *_exchanger;
+    std::map<std::string, double> _exchangeRateData;
+    bool databaseToMap(std::ifstream& database);
+    void printExchangeRates(std::ifstream& input);
+    
 };
 
 #endif
