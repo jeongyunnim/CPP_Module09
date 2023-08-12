@@ -2,8 +2,6 @@
 #include <iomanip>
 #include "PmergeMe.hpp"
 
-
-
 long	getTime(void)
 {
 	struct timeval	tv;

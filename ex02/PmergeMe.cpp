@@ -210,57 +210,45 @@ static void binarySearchDequeForOdd(std::deque<int>& result, int& targetValue)
 
 void	PmergeMe::sortingPendingChainDeque(PmergeMe::intPairDeque& mainChain, int straggler)
 {
-	std::deque<int> result;
 	size_t 			i = 0;
-	int	 			jacobsthal = 1;
 
 	for (PmergeMe::intPairDeque::iterator it = mainChain.begin(); it != mainChain.end(); it++)
-	{
-		result.push_back(it->first);
-	}
+		_argsDeque.push_back(it->first);
 	if (mainChain.size() == 0)
 		return ;
-	result.push_front(mainChain[i].second);
-	while (i < mainChain.size())
+	_argsDeque.push_front(mainChain[i].second);
+	for (int jacobsthal = 1; i < mainChain.size(); i++ && jacobsthal++)
 	{
-		/* 다음 야스콥탈 수를 가져와야 함. 그 뒤에 전 야스콥탈 수보다 적게 가져가야 함. */
 		i = findJacobsthalNum(jacobsthal) - 1;
 		if (i >= mainChain.size())
 			i = mainChain.size() - 1;
 		for (int j = i; j >= findJacobsthalNum(jacobsthal - 1); j--)
-		{
-			binarySearchDeque(result, mainChain[j]);
-		}
-		jacobsthal += 1;
-		i++;
+			binarySearchDeque(_argsDeque, mainChain[j]);
 	}
 	if (straggler >= 0)
-		binarySearchDequeForOdd(result, straggler);
-	_argsDeque = result;
+		binarySearchDequeForOdd(_argsDeque, straggler);
 }
 
 void PmergeMe::mergeInsertionSortingDeque(void)
 {
-	//convert pair deque
 	PmergeMe::intPairDeque	mainChain;
-	int				straggler = -1;
+	int						straggler = -1;
 
 	initPairDeque(_argsDeque, mainChain, straggler);
+	_argsDeque.clear();
 	std::sort(mainChain.begin(), mainChain.end());
 	sortingPendingChainDeque(mainChain, straggler);
 }
 
-/* insertion sort + binary search*/
 static void	initPairList(std::list<int>& src, std::list<std::pair<int , int> >& mainChain, int& straggler)
 {
 	std::list<int>::iterator it = src.begin();
-	size_t i = 0;
-	size_t first;
-	size_t second;
+	int first;
+	int second;
 	
 	if (src.size() % 2 == 1)
 		straggler = *src.rbegin();
-	while (i < src.size() && i + 1 < src.size())
+	for (size_t i = 0; i < src.size() && i + 1 < src.size(); i += 2)
 	{
 		first = *it;
 		it++;
@@ -270,7 +258,6 @@ static void	initPairList(std::list<int>& src, std::list<std::pair<int , int> >& 
 			mainChain.push_back(std::pair<int, int>(first, second));
 		else
 			mainChain.push_back(std::pair<int, int>(second, first));
-		i += 2;
 	}
 }
 
@@ -302,10 +289,10 @@ static void binarySearchList(std::list<int>& result, std::pair<int,int>& targetV
 {
 	std::list<int>::iterator	left = result.begin();
 	std::list<int>::iterator	right = result.end();
-	right--;
 	size_t						len;
 	int 						mid = -1;
 
+	right--;
 	while (getLength(result.begin(), left, -1) <= getLength(result.begin(), right, -1))
 	{
 		if (mid == -1)
@@ -374,32 +361,24 @@ static std::list<std::pair<int, int> >::iterator ftAdvancedForPair(std::list<std
 void	PmergeMe::sortingPendingChainList(PmergeMe::intPairList& mainChain, int straggler)
 {
 	PmergeMe::intPairList::iterator it = mainChain.begin();
-	std::list<int> result;
-	size_t 			i = 0;
 	int	 			jacobsthal = 1;
 
 	if (mainChain.size() == 0)
 		return ;
 	for (; it != mainChain.end(); it++)
-	{
-		result.push_back(it->first);
-	}
+		_argsList.push_back(it->first);
 	it = mainChain.begin();
-	result.push_front(it->second);
-
-	while (i < mainChain.size())
+	_argsList.push_front(it->second);
+	for (size_t i = 0; i < mainChain.size(); i++ && jacobsthal++)
 	{
 		i = findJacobsthalNum(jacobsthal) - 1;
 		if (i >= mainChain.size())
 			i = mainChain.size() - 1;
 		for (int j = i; j >= findJacobsthalNum(jacobsthal - 1); j--)
-			binarySearchList(result, *ftAdvancedForPair(mainChain.begin(), mainChain.end(), j));
-		jacobsthal += 1;
-		i++;
+			binarySearchList(_argsList, *ftAdvancedForPair(mainChain.begin(), mainChain.end(), j));
 	}
 	if (straggler >= 0)
-		binarySearchListForOdd(result, straggler);
-	_argsList = result;
+		binarySearchListForOdd(_argsList, straggler);
 }
 
 void PmergeMe::mergeInsertionSortingList(void)
@@ -408,10 +387,7 @@ void PmergeMe::mergeInsertionSortingList(void)
 	int						straggler = -1;
 
 	initPairList(_argsList, mainChain, straggler);
-
 	mainChain.sort();
-
+	_argsList.clear();
 	sortingPendingChainList(mainChain, straggler);
-
-
 }
