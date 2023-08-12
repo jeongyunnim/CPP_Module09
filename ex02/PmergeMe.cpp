@@ -1,12 +1,27 @@
 #include "PmergeMe.hpp"
 
-std::deque<int> PmergeMe::_argsDeque;
-std::list<int> PmergeMe::_argsList;
+PmergeMe *PmergeMe::_sorter = NULL;
 
 size_t	PmergeMe::getRange(void)
 {
 	return (_argsDeque.size());
 }
+
+PmergeMe*	PmergeMe::getInstance(void)
+{
+	if(_sorter == NULL)
+		_sorter = new PmergeMe();
+	return (_sorter);
+}
+
+void		PmergeMe::cleanUp(void)
+{
+	if (_sorter != NULL)
+		delete _sorter;
+}
+
+PmergeMe::PmergeMe(void) {};
+PmergeMe::~PmergeMe(void) {};
 
 /* argument parsing */
 void PmergeMe::printRawArguments(void)
