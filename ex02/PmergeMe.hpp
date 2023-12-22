@@ -10,13 +10,17 @@
 #include <list>
 #include "../Colors.hpp"
 
+typedef struct Node
+{
+	int content;
+	int pendingContent;
+	int level;
+} Node;
+
 class PmergeMe
 {
 
 public:
-
-	typedef	std::deque<std::pair<int, int> >	intPairDeque;
-	typedef	std::list<std::pair<int, int> >		intPairList;
 
 	static PmergeMe*	getInstance(void);
 	static void			cleanUp(void);
@@ -26,11 +30,12 @@ public:
 	void 				printArrangedArguments(void);
 	void				mergeInsertionSortingDeque(void);
 	void				mergeInsertionSortingList(void);
+	int					findJacobsthalNum(int index);
 
 private:
  
-	void	sortingPendingChainDeque(PmergeMe::intPairDeque& mainChain, int straggler);
-	void	sortingPendingChainList(PmergeMe::intPairList& mainChain, int straggler);
+	void	sortingPendingChainDeque(std::deque<Node>& mainChain, int straggler);
+	// void	sortingPendingChainList(PmergeMe::intPairList& mainChain, int straggler);
 	bool	readOneArg(std::string arg);
 	bool	argToContainer(const std::string& oneExpression);
 	bool	pushNumber(const std::string& numString);

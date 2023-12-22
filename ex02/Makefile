@@ -8,6 +8,9 @@ INCS		=	./PmergeMe.hpp\
 				
 SRCS		=	./main.cpp\
 				./PmergeMe.cpp\
+				./argParsing.cpp\
+				./mergeInsertionUsingDeque.cpp\
+				./singletonUtil.cpp\
 				../Colors.cpp\
 
 OBJS		=	$(SRCS:%.cpp=%.o)
