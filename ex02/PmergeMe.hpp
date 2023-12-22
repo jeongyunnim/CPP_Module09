@@ -15,6 +15,7 @@ typedef struct Node
 	int content;
 	int pendingContent;
 	int level;
+
 } Node;
 
 class PmergeMe
@@ -30,26 +31,28 @@ public:
 	void 				printArrangedArguments(void);
 	void				mergeInsertionSortingDeque(void);
 	void				mergeInsertionSortingList(void);
-	int					findJacobsthalNum(int index);
+	std::deque<Node>	sortingMainChainRecursively(std::deque<Node>& mainChain, Node straggler);
 
 private:
  
-	void	sortingPendingChainDeque(std::deque<Node>& mainChain, int straggler);
-	// void	sortingPendingChainList(PmergeMe::intPairList& mainChain, int straggler);
+	void	sortingPendingChainDeque(std::deque<Node>& mainChain, Node& straggler);
+	// void	sortingPendingChainList(PmergeMe::intPairList& mainChain, Node& straggler);
 	bool	readOneArg(std::string arg);
 	bool	argToContainer(const std::string& oneExpression);
 	bool	pushNumber(const std::string& numString);
+	int		findJacobsthalNum(int index);
+	void	initJacobsthalSequence(void);
 
 	PmergeMe(void);
 	~PmergeMe(void);
 	PmergeMe& operator=(const PmergeMe& rhs);
 	PmergeMe(const PmergeMe& obj);
 
-	static PmergeMe *_sorter;
+	static PmergeMe *mSorter;
 
-	std::deque<int> _argsDeque;
-	std::list<int> _argsList;
-	
+	std::deque<int> mArgsDeque;
+	std::list<int>	mArgsList;
+	std::deque<int> mJacobsthalSequence;
 
 };
 

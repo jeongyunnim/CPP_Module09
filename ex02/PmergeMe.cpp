@@ -5,11 +5,25 @@ PmergeMe::~PmergeMe(void) {};
 
 int	PmergeMe::findJacobsthalNum(int index)
 {
-	if (index == 0)
-		return (1);
-	else if (index == 1)
-		return (3);
-	return (findJacobsthalNum(index - 1) + 2 * findJacobsthalNum(index - 2));
+	return (mJacobsthalSequence[index]);
+}
+
+void PmergeMe::initJacobsthalSequence(void)
+{
+	bool	endFlag = false;
+	int		jacobsthalIndex = 2;
+	
+	mJacobsthalSequence.push_back(3);
+	mJacobsthalSequence.push_back(5);
+	
+	for (int jacobsthalNum = 0; endFlag == false;)
+	{
+		jacobsthalNum = mJacobsthalSequence[jacobsthalIndex - 1] + (2 * mJacobsthalSequence[jacobsthalIndex - 2]);
+		mJacobsthalSequence.push_back(jacobsthalNum);
+
+		if (jacobsthalNum > static_cast<int>(mArgsDeque.size()))
+			endFlag = true;
+	}
 }
 
 /* Using List */

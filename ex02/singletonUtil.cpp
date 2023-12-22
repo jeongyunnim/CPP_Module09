@@ -1,21 +1,21 @@
 #include "PmergeMe.hpp"
 
-PmergeMe *PmergeMe::_sorter = NULL;
+PmergeMe *PmergeMe::mSorter = NULL;
 
 size_t	PmergeMe::getRange(void)
 {
-	return (_argsDeque.size());
+	return (mArgsDeque.size());
 }
 
 PmergeMe*	PmergeMe::getInstance(void)
 {
-	if(_sorter == NULL)
-		_sorter = new PmergeMe();
-	return (_sorter);
+	if(mSorter == NULL)
+		mSorter = new PmergeMe();
+	return (mSorter);
 }
 
 void		PmergeMe::cleanUp(void)
 {
-	if (_sorter != NULL)
-		delete _sorter;
+	if (mSorter != NULL)
+		delete mSorter;
 }

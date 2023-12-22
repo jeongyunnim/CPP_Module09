@@ -3,7 +3,7 @@
 void PmergeMe::printRawArguments(void)
 {
 	std::cout << Colors::BoldMagentaString("[original sequence]") << std::endl;
-	for (std::deque<int>::const_iterator cit = _argsDeque.begin(); cit != _argsDeque.end(); cit++)
+	for (std::deque<int>::const_iterator cit = mArgsDeque.begin(); cit != mArgsDeque.end(); cit++)
 	{
 		std::cout << *cit << ' ';
 	}
@@ -12,10 +12,10 @@ void PmergeMe::printRawArguments(void)
 
 void PmergeMe::printArrangedArguments(void)
 {
-	int temp = *_argsDeque.begin();
+	int temp = *mArgsDeque.begin();
 	std::cout << Colors::BoldMagentaString("[sorted sequence]") << std::endl;
 	std::cout << Colors::BlueString("[deque] ");
-	for (std::deque<int>::const_iterator cit = _argsDeque.begin(); cit != _argsDeque.end(); cit++)
+	for (std::deque<int>::const_iterator cit = mArgsDeque.begin(); cit != mArgsDeque.end(); cit++)
 	{
 		if (temp > *cit)
 		{
@@ -27,9 +27,9 @@ void PmergeMe::printArrangedArguments(void)
 	}
 	std::cout << std::endl;
 	
-	temp = *_argsList.begin();
+	temp = *mArgsList.begin();
 	std::cout << Colors::BlueString("[list]  ");
-	for (std::list<int>::const_iterator cit = _argsList.begin(); cit != _argsList.end(); cit++)
+	for (std::list<int>::const_iterator cit = mArgsList.begin(); cit != mArgsList.end(); cit++)
 	{
 		if (temp > *cit)
 		{
@@ -63,8 +63,8 @@ bool	PmergeMe::pushNumber(const std::string& numString)
 		std::cout << Colors::RedString("Error: argument range is {0 .. INT_MAX} ") << numString << std::endl;
 		return (false);
 	}
-	_argsDeque.push_back(lValue);
-	_argsList.push_back(lValue);
+	mArgsDeque.push_back(lValue);
+	mArgsList.push_back(lValue);
 	return (true);
 }
 
