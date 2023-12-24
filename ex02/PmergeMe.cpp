@@ -5,6 +5,12 @@ PmergeMe::~PmergeMe(void) {};
 
 int	PmergeMe::findJacobsthalNum(int index)
 {
+	if (index == -1)
+	{
+		std::cout << Colors::Green << index << "번째 " << "jacobsthal num: 1" << Colors::Reset << std::endl;
+		return (1);
+	}
+	std::cout << Colors::Green << index << "번째 " << "jacobsthal num: " << mJacobsthalSequence[index] << Colors::Reset << std::endl;
 	return (mJacobsthalSequence[index]);
 }
 
@@ -13,17 +19,17 @@ void PmergeMe::initJacobsthalSequence(void)
 	bool	endFlag = false;
 	int		jacobsthalIndex = 2;
 	
+	mJacobsthalSequence.push_back(1);
 	mJacobsthalSequence.push_back(3);
-	mJacobsthalSequence.push_back(5);
 	
-	for (int jacobsthalNum = 0; endFlag == false;)
+	for (int jacobsthalNum = 0; endFlag == false; jacobsthalIndex++)
 	{
 		jacobsthalNum = mJacobsthalSequence[jacobsthalIndex - 1] + (2 * mJacobsthalSequence[jacobsthalIndex - 2]);
 		mJacobsthalSequence.push_back(jacobsthalNum);
-
 		if (jacobsthalNum > static_cast<int>(mArgsDeque.size()))
 			endFlag = true;
 	}
+
 }
 
 /* Using List */

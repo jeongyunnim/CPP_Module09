@@ -31,17 +31,19 @@ public:
 	void 				printArrangedArguments(void);
 	void				mergeInsertionSortingDeque(void);
 	void				mergeInsertionSortingList(void);
-	std::deque<Node>	sortingMainChainRecursively(std::deque<Node>& mainChain, Node straggler);
-
-private:
+	void				initJacobsthalSequence(void);
+	void				sortingMainChainRecursively(std::deque<Node>& mainChain, Node straggler);
  
+private:
+
+	void 	sortMainChain(std::deque<Node>& mainChain, Node& straggler);
 	void	sortingPendingChainDeque(std::deque<Node>& mainChain, Node& straggler);
 	// void	sortingPendingChainList(PmergeMe::intPairList& mainChain, Node& straggler);
 	bool	readOneArg(std::string arg);
 	bool	argToContainer(const std::string& oneExpression);
 	bool	pushNumber(const std::string& numString);
 	int		findJacobsthalNum(int index);
-	void	initJacobsthalSequence(void);
+	void 	insertPendingChain(std::deque<Node>& mainChain, Node& straggler);
 
 	PmergeMe(void);
 	~PmergeMe(void);

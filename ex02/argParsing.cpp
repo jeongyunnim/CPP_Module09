@@ -20,26 +20,26 @@ void PmergeMe::printArrangedArguments(void)
 		if (temp > *cit)
 		{
 			std::cout << Colors::RedString("Error: not arranged ") << *cit << std::endl;
-			return ;
+			// return ;
 		}
 		temp = *cit;
 		std::cout << *cit << ' ';
 	}
 	std::cout << std::endl;
 	
-	temp = *mArgsList.begin();
-	std::cout << Colors::BlueString("[list]  ");
-	for (std::list<int>::const_iterator cit = mArgsList.begin(); cit != mArgsList.end(); cit++)
-	{
-		if (temp > *cit)
-		{
-			std::cout << Colors::RedString("Error: not arranged ") << *cit << std::endl;
-			return ;
-		}
-		temp = *cit;
-		std::cout << *cit << ' ';
-	}
-	std::cout << std::endl;
+	// temp = *mArgsList.begin();
+	// std::cout << Colors::BlueString("[list]  ");
+	// for (std::list<int>::const_iterator cit = mArgsList.begin(); cit != mArgsList.end(); cit++)
+	// {
+	// 	if (temp > *cit)
+	// 	{
+	// 		std::cout << Colors::RedString("Error: not arranged ") << *cit << std::endl;
+	// 		// return ;
+	// 	}
+	// 	temp = *cit;
+	// 	std::cout << *cit << ' ';
+	// }
+	// std::cout << std::endl;
 }
 
 static	int	printErrorInputReturnFalse(const std::string& input)

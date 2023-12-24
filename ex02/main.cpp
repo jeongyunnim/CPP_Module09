@@ -27,6 +27,7 @@ int main(int argc, char *argv[])
 	if (sorter->pushArguments(argv) == false)
 		return (1);
 	sorter->printRawArguments();
+	sorter->initJacobsthalSequence();
 	startD = getTime();
 	sorter->mergeInsertionSortingDeque();
 	endD = getTime();
