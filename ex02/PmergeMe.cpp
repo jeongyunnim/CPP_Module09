@@ -7,10 +7,8 @@ int	PmergeMe::findJacobsthalNum(int index)
 {
 	if (index == -1)
 	{
-		std::cout << Colors::Green << index << "번째 " << "jacobsthal num: 1" << Colors::Reset << std::endl;
 		return (1);
 	}
-	std::cout << Colors::Green << index << "번째 " << "jacobsthal num: " << mJacobsthalSequence[index] << Colors::Reset << std::endl;
 	return (mJacobsthalSequence[index]);
 }
 

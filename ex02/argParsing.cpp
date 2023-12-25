@@ -19,7 +19,7 @@ void PmergeMe::printArrangedArguments(void)
 	{
 		if (temp > *cit)
 		{
-			std::cout << Colors::RedString("Error: not arranged ") << *cit << std::endl;
+			std::cout << Colors::RedString("not arranged ") ;
 			// return ;
 		}
 		temp = *cit;

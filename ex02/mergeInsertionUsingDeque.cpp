@@ -16,7 +16,6 @@ static void	initMainDeque(std::deque<int>& src, std::deque<Node>& mainChain, Nod
 	{
 		straggler.content = -1;
 	}
-	std::cout << "straggler init with [" << straggler.content << "]" << std::endl;
 	for (std::deque<int>::iterator it = src.begin(); it + 1 != src.end() && it != src.end(); it += 2)
 	{
 		if (*it > *(it + 1))
@@ -33,14 +32,20 @@ static void	initMainDeque(std::deque<int>& src, std::deque<Node>& mainChain, Nod
 	}
 }
 
-static void binarySearchDeque(std::deque<Node>& mainChain, Node& targetValue, int index)
+static void binarySearchDeque(std::deque<Node>& mainChain, Node& targetValue)
 {
 	int	left = 0;
-	int	right = index;
+	int	right = 0;
 	Node temp;
 
 	temp.content = targetValue.pendingContent;
 	temp.pendingContent = -1;
+	for (std::deque<Node>::iterator it = mainChain.begin(); it != mainChain.end(); it++)
+	{
+		if (it->content == targetValue.content)
+			break ;
+		right++;
+	}
 	while (left <= right)
 	{
 		int mid = (left + right) / 2;
@@ -57,7 +62,7 @@ static void binarySearchDeque(std::deque<Node>& mainChain, Node& targetValue, in
 	mainChain.insert(mainChain.begin() + left, temp);
 }
 
-static void binarySearchDequeForOdd(std::deque<Node>& result, Node targetValue)
+static void binarySearchDequeForOdd(std::deque<Node>& result, Node& targetValue)
 {
 	int	left = 0;
 	int	right = result.size() - 1;
@@ -81,7 +86,7 @@ static void binarySearchDequeForOdd(std::deque<Node>& result, Node targetValue)
 	result.insert(result.begin() + left, temp);
 }
 
-static void	separateMainChain(std::deque<Node>& pendingChain, std::deque<Node> target, Node& straggler)
+static void	separateMainChain(std::deque<Node>& pendingChain, std::deque<Node>& target, Node& straggler)
 {
 	Node temp;
 
@@ -98,7 +103,6 @@ static void	separateMainChain(std::deque<Node>& pendingChain, std::deque<Node> t
 		straggler.content = -1;
 		straggler.pendingContent = -1;
 	}
-	std::cout << Colors::BlueString("straggler initialized with ") << straggler.content << std::endl;
 	if (target.size() <= 1)
 	{
 		return ;
@@ -127,8 +131,7 @@ void PmergeMe::insertPendingChain(std::deque<Node>& mainChain, Node& straggler)
 
 	temp.pendingContent = -1;
 
-	std::cout << "insert target Chain size: " << mainChain.size() << std::endl;
-	std::cout << "\noriginal sequence: ";
+	std::cout << "original sequence: ";
 	for (std::deque<Node>::iterator it = mainChain.begin(); it != mainChain.end(); it++)
 	{
 		std::cout << it->content << " ";
@@ -141,6 +144,8 @@ void PmergeMe::insertPendingChain(std::deque<Node>& mainChain, Node& straggler)
 	}
 	std::cout << std::endl;
 	std::cout << "  ㄴstraggler: " << straggler.content << std::endl;
+	std::cout << "  ㄴstraggler: " << straggler.pendingContent << std::endl;
+
 	if (mainChain.size() == 0 && straggler.content >= 0)
 	{
 		temp.content = straggler.pendingContent;
@@ -159,12 +164,12 @@ void PmergeMe::insertPendingChain(std::deque<Node>& mainChain, Node& straggler)
 	{
 		temp.content = mainChain[0].pendingContent;
 		result.push_front(temp);
-		binarySearchDeque(result, mainChain[1], 1);
+		binarySearchDeque(result, mainChain[1]);
 	}
 	else
 	{
 		temp.content = mainChain[0].pendingContent;
-		result.push_back(temp);
+		result.push_front(temp);
 		for (int jacobsthalIndex = 1; i < mainChain.size(); i++ && jacobsthalIndex++)
 		{
 			i = findJacobsthalNum(jacobsthalIndex) - 1;
@@ -173,7 +178,7 @@ void PmergeMe::insertPendingChain(std::deque<Node>& mainChain, Node& straggler)
 				i = mainChain.size() - 1;
 			}
 			for (int j = i; j >= findJacobsthalNum(jacobsthalIndex - 1); j--)
-				binarySearchDeque(result, mainChain[j], j);
+				binarySearchDeque(result, mainChain[j]);
 		}
 	}
 	if (straggler.content >= 0)
@@ -206,7 +211,6 @@ void PmergeMe::sortingMainChainRecursively(std::deque<Node>& mainChain, Node sup
 		std::cout << "sequence size initialized with: " << mainChain.size() << "\n" << std::endl;
 		sequenceSize = mainChain.size();
 	}
-
 	if (mainChain.size() == 0 && straggler.content >= 0)
 	{
 		std::cout << "마지막 한 짝" << std::endl;
@@ -214,11 +218,8 @@ void PmergeMe::sortingMainChainRecursively(std::deque<Node>& mainChain, Node sup
 		mainChain = separatedChain;
 		return ;
 	}
-	if (sequenceSize * 2 == mainChain.size())
+	else if (mainChain.size() > 0 && mainChain[0].pendingContent == -1)
 	{
-		std::cout << Colors::MagentaString("정렬을 모두 다 하고 return") << std::endl;
-		// insertPendingChain(separatedChain, superStraggler);
-		// mainChain = separatedChain;
 		return ;
 	}
 	// else if (mainChain.size() <= 2)
@@ -231,40 +232,52 @@ void PmergeMe::sortingMainChainRecursively(std::deque<Node>& mainChain, Node sup
 	//main chain to M--P chain(1/2 size) + init straggler
 	separateMainChain(separatedChain, mainChain, straggler);
 	
-	/* 디버깅용 출력부 */
-	static int index = 1;
-	std::cout << index++ << " 번째 main chain: " <<  mainChain.size() << ", separated chain: " << separatedChain.size() << ", straggler: " << straggler.content <<  std::endl;
-	for (int tab = index; tab > 0; tab--)
+	if (separatedChain.size() > 0)
 	{
-		std::cout << "  ";
+		sortingMainChainRecursively(separatedChain, superStraggler);
 	}
-	/* 디버깅용 출력부 end */
+	for (std::deque<Node>::iterator separatedSequenceIt = separatedChain.begin(); separatedSequenceIt != separatedChain.end(); separatedSequenceIt++)
 	{
-		sortingMainChainRecursively(separatedChain, straggler);
-		insertPendingChain(separatedChain, superStraggler);
-		std::cout << Colors::BoldBlueString("inserted chain size: ") << separatedChain.size() << std::endl;
-		// arranged chain의 순서대로 main chain의 인덱스를 변경해줘야 함.
-		// index만 변경해주는 방법.
-		// 이 방법은 최소 비교 알고리즘을 구현했다고는 할 수 없을 것 같다. 각 배열의 값을 비교하는 것을 n^2로 처리하는 게 말이 되나?
-		for (std::deque<Node>::iterator arrangedSequenceIt = separatedChain.begin(); arrangedSequenceIt != separatedChain.end(); arrangedSequenceIt++)
+		std::cout << separatedSequenceIt->content << " changed ";
+		for (std::deque<Node>::iterator originalSequenceIt = mainChain.begin(); originalSequenceIt != mainChain.end(); originalSequenceIt++)
 		{
-			for (std::deque<Node>::iterator originalSequenceIt = mainChain.begin(); originalSequenceIt != mainChain.end(); originalSequenceIt++)
+			if (separatedSequenceIt->content == originalSequenceIt->content)
 			{
-				if (arrangedSequenceIt->content == originalSequenceIt->content)
-				{
-					arrangedSequenceIt->pendingContent = originalSequenceIt->pendingContent;
-					originalSequenceIt->content = -1;
-				}
+				std::cout << separatedSequenceIt->pendingContent << " -> " << originalSequenceIt->pendingContent << std::endl;
+				separatedSequenceIt->pendingContent = originalSequenceIt->pendingContent;
+				originalSequenceIt->content = -1;
+				break ;
 			}
 		}
-		mainChain = separatedChain;
-
 	}
+	std::cout << Colors::BoldBlueString("insert target Chain size: ") << separatedChain.size() << std::endl;
+	
+	insertPendingChain(separatedChain, straggler); // straggler의 위치를 잘 설정해줘야 함.
+	
+	std::cout << Colors::BoldBlueString("inserted chain size: ") << separatedChain.size() << std::endl;
+	
+	// arranged chain의 순서대로 main chain의 인덱스를 변경해줘야 함.
+	// index만 변경해주는 방법.
+	// 이 방법은 최소 비교 알고리즘을 구현했다고는 할 수 없을 것 같다. 각 배열의 값을 비교하는 것을 n^2로 처리하는 게 말이 되나?
+	mainChain = separatedChain;
+	if (sequenceSize < mainChain.size())
+	{
+		std::cout << Colors::MagentaString("정렬을 모두 다 하고 return") << std::endl;
+		if (straggler.content >= 0)
+		{
+			binarySearchDequeForOdd(mainChain, straggler);
+		}
+	}
+
 }
 
 void PmergeMe::sortMainChain(std::deque<Node>& mainChain, Node& straggler)
 {
 	sortingMainChainRecursively(mainChain, straggler);
+	// if (straggler.content >= 0)
+	// {
+	// 	binarySearchDequeForOdd(mainChain, straggler);
+	// }
 	// 여기에는 mArgDeque에 넣어야 함.
 }
 
@@ -272,6 +285,7 @@ void PmergeMe::mergeInsertionSortingDeque(void)
 {
 	std::deque<Node>	mainChain;
 	Node				straggler;
+	std::deque<int> test;
 
 	if (mArgsDeque.size() <= 1)
 	{
@@ -280,6 +294,8 @@ void PmergeMe::mergeInsertionSortingDeque(void)
 	straggler.content = -1;
 	straggler.pendingContent = -1;
 	initMainDeque(mArgsDeque, mainChain, straggler);
+	
+	test = mArgsDeque;
 	mArgsDeque.clear();
 	// std::sort(mainChain.begin(), mainChain.end());
 	sortMainChain(mainChain, straggler);
@@ -287,4 +303,12 @@ void PmergeMe::mergeInsertionSortingDeque(void)
 	{
 		mArgsDeque.push_back(it->content);
 	}
+	std::sort(test.begin(), test.end());
+	std::cout << "[sorted]\n[deque] ";
+	for (std::deque<int>::iterator it = test.begin(); it != test.end(); it++)
+	{
+		std::cout << *it << " ";
+	}
+	std::cout << std::endl;
+	
 }
