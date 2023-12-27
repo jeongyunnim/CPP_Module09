@@ -193,7 +193,7 @@ void PmergeMe::insertPendingChain(std::deque<Node>& mainChain, Node& straggler)
 	mainChain = result;
 }
 
-void PmergeMe::sortingMainChainRecursively(std::deque<Node>& mainChain, Node superStraggler)
+void PmergeMe::sortingMainChainRecursively(std::deque<Node>& mainChain)
 {
 	std::deque<Node>	separatedChain;
 	Node				straggler;
@@ -213,29 +213,15 @@ void PmergeMe::sortingMainChainRecursively(std::deque<Node>& mainChain, Node sup
 	}
 	if (mainChain.size() == 0 && straggler.content >= 0)
 	{
-		std::cout << "마지막 한 짝" << std::endl;
-		insertPendingChain(separatedChain, superStraggler);
+		std::cout << Colors::BoldGreenString("마지막 한 짝") << std::endl;
 		mainChain = separatedChain;
 		return ;
 	}
-	else if (mainChain.size() > 0 && mainChain[0].pendingContent == -1)
-	{
-		return ;
-	}
-	// else if (mainChain.size() <= 2)
-	// {
-	// 	std::cout << Colors::MagentaString("2개 아래라 return") << std::endl;
-	// 	insertPendingChain(mainChain, superStraggler);
-	// 	return ;
-	// }
 
 	//main chain to M--P chain(1/2 size) + init straggler
-	separateMainChain(separatedChain, mainChain, straggler);
-	
-	if (separatedChain.size() > 0)
-	{
-		sortingMainChainRecursively(separatedChain, superStraggler);
-	}
+	separateMainChain(separatedChain, mainChain, straggler);	
+	sortingMainChainRecursively(separatedChain);
+
 	for (std::deque<Node>::iterator separatedSequenceIt = separatedChain.begin(); separatedSequenceIt != separatedChain.end(); separatedSequenceIt++)
 	{
 		std::cout << separatedSequenceIt->content << " changed ";
@@ -273,11 +259,12 @@ void PmergeMe::sortingMainChainRecursively(std::deque<Node>& mainChain, Node sup
 
 void PmergeMe::sortMainChain(std::deque<Node>& mainChain, Node& straggler)
 {
-	sortingMainChainRecursively(mainChain, straggler);
-	// if (straggler.content >= 0)
-	// {
-	// 	binarySearchDequeForOdd(mainChain, straggler);
-	// }
+	sortingMainChainRecursively(mainChain);
+	if (straggler.content >= 0)
+	{
+		std::cout << "마지막 straggler: " << straggler.content << std::endl;
+		binarySearchDequeForOdd(mainChain, straggler);
+	}
 	// 여기에는 mArgDeque에 넣어야 함.
 }
 
