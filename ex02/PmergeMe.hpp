@@ -32,7 +32,7 @@ public:
 	void				mergeInsertionSortingDeque(void);
 	void				mergeInsertionSortingList(void);
 	void				initJacobsthalSequence(void);
-	void				sortingMainChainRecursively(std::deque<Node>& mainChain);
+	void				sortingMainChainRecursively(std::deque<Node>& mainChain, Node& superStraggler);
  
 private:
 
