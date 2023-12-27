@@ -1,6 +1,5 @@
 #include "PmergeMe.hpp"
 
-// init을 할 필요가 있나?
 static void	initMainDeque(std::deque<int>& src, std::deque<Node>& mainChain, Node& straggler)
 {
 	Node temp;
@@ -120,29 +119,13 @@ static void	separateMainChain(std::deque<Node>& pendingChain, std::deque<Node>& 
 	}
 }
 
-void PmergeMe::insertPendingChain(std::deque<Node>& mainChain, Node& straggler)
+void PmergeMe::insertPendingChain(std::deque<Node>& mainChain)
 {
 	size_t				i = 0;
 	std::deque<Node>	result = mainChain;
 	Node				temp;
 
 	temp.pendingContent = -1;
-
-	std::cout << "original sequence: ";
-	for (std::deque<Node>::iterator it = mainChain.begin(); it != mainChain.end(); it++)
-	{
-		std::cout << it->content << " ";
-	}
-	std::cout << std::endl;
-	std::cout << "original subsequn: ";
-	for (std::deque<Node>::iterator it = mainChain.begin(); it != mainChain.end(); it++)
-	{
-		std::cout << it->pendingContent << " ";
-	}
-	std::cout << std::endl;
-	std::cout << "  ㄴstraggler: " << straggler.content << std::endl;
-	std::cout << "  ㄴstraggler: " << straggler.pendingContent << std::endl;
-
 	if (mainChain.size() == 2)
 	{
 		temp.content = mainChain[0].pendingContent;
@@ -164,15 +147,6 @@ void PmergeMe::insertPendingChain(std::deque<Node>& mainChain, Node& straggler)
 				binarySearchDeque(result, mainChain[j]);
 		}
 	}
-	// if (straggler.content >= 0)
-	// 	binarySearchDequeForOdd(result, straggler);
-
-	std::cout << "arranged sequence: ";
-	for (std::deque<Node>::iterator it = result.begin(); it != result.end(); it++)
-	{
-		std::cout << it->content << " ";
-	}
-	std::cout << std::endl;
 	mainChain = result;
 }
 
@@ -180,7 +154,6 @@ void PmergeMe::sortingMainChainRecursively(std::deque<Node>& mainChain, Node& su
 {
 	std::deque<Node>	separatedChain;
 	Node				straggler;
-	static size_t		sequenceSize;
 	/*
 		1. 재귀로 나눈다.
 		2. 처음으로 풀릴 때 정렬이 된 상태로 반환한다.
@@ -188,25 +161,6 @@ void PmergeMe::sortingMainChainRecursively(std::deque<Node>& mainChain, Node& su
 			3-1. 반환받은 배열의 순서대로 상위 배열이 정렬이 되어야 함.
 		4. 호출한 상태의 배열을 반환하게 된다.
 	*/
-
-	(void)superStraggler;
-	std::cout << Colors::BoldCyanString("main chain: ");
-	for (std::deque<Node>::iterator it = mainChain.begin(); it != mainChain.end(); it++)
-	{
-		std::cout << it->content << " ";
-	}
-	std::cout << Colors::BoldCyanString("\npend chain: ");
-	for (std::deque<Node>::iterator it = mainChain.begin(); it != mainChain.end(); it++)
-	{
-		std::cout << it->pendingContent << " ";
-	}
-	std::cout << std::endl;
-
-	if (sequenceSize == 0)
-	{
-		std::cout << "sequence size initialized with: " << mainChain.size() << "\n" << std::endl;
-		sequenceSize = mainChain.size();
-	}
 
 	//main chain to M--P chain(1/2 size) + init straggler
 	separateMainChain(separatedChain, mainChain, straggler);
@@ -225,80 +179,34 @@ void PmergeMe::sortingMainChainRecursively(std::deque<Node>& mainChain, Node& su
 			separatedChain.push_back(temp);
 			temp.content = straggler.content;
 			separatedChain.push_back(temp);
-
 			if (superStraggler.content >= 0)
 				binarySearchDequeForOdd(separatedChain, superStraggler);
 			mainChain = separatedChain;
-			std::cout << "마지막 한 짝 arranged sequence: ";
-			for (std::deque<Node>::iterator it = mainChain.begin(); it != mainChain.end(); it++)
-			{
-				std::cout << it->content << " ";
-			}
-			std::cout << std::endl;
 			return ;
 		}
 	}
 
-	bool flag;
 	for (std::deque<Node>::iterator separatedSequenceIt = separatedChain.begin(); separatedSequenceIt != separatedChain.end(); separatedSequenceIt++)
 	{
-		flag = false;
-		// std::cout << separatedSequenceIt->content << " changed ";
 		for (std::deque<Node>::iterator originalSequenceIt = mainChain.begin(); originalSequenceIt != mainChain.end(); originalSequenceIt++)
 		{
 			if (separatedSequenceIt->content == originalSequenceIt->content)
 			{
-				flag = true;
-				// std::cout << separatedSequenceIt->pendingContent << " -> " << originalSequenceIt->pendingContent << std::endl;
 				separatedSequenceIt->pendingContent = originalSequenceIt->pendingContent;
 				originalSequenceIt->content = -1;
 				break ;
 			}
 		}
-		if (flag == false && separatedSequenceIt->content == straggler.content)
-		{
-			// std::cout << separatedSequenceIt->pendingContent << " -> " << straggler.pendingContent << std::endl;
-			separatedSequenceIt->pendingContent = straggler.pendingContent;
-			straggler.content = -1;
-		}
 	}
-	std::cout << Colors::BoldBlueString("insert target Chain size: ") << separatedChain.size() << std::endl;
-	
-	insertPendingChain(separatedChain, straggler); // straggler의 위치를 잘 설정해줘야 함.
-	
+	insertPendingChain(separatedChain);
 	if (superStraggler.content >= 0)
 		binarySearchDequeForOdd(separatedChain, superStraggler);
-	std::cout << Colors::BoldBlueString("inserted chain size: ") << separatedChain.size() << std::endl;
-	
-	// arranged chain의 순서대로 main chain의 인덱스를 변경해줘야 함.
-	// index만 변경해주는 방법.
-	// 이 방법은 최소 비교 알고리즘을 구현했다고는 할 수 없을 것 같다. 각 배열의 값을 비교하는 것을 n^2로 처리하는 게 말이 되나?
 	mainChain = separatedChain;
-	if (sequenceSize <= mainChain.size())
-	{
-		std::cout << mainChain.size() << Colors::MagentaString(" [정렬을 모두 다 하고 return]\n");
-		for (std::deque<Node>::iterator it = mainChain.begin(); it != mainChain.end(); it++)
-		{
-			std::cout << it->content << " ";
-		}
-		std::cout << std::endl;
-		for (std::deque<Node>::iterator it = mainChain.begin(); it != mainChain.end(); it++)
-		{
-			std::cout << it->pendingContent << " ";
-		}
-		std::cout << std::endl;
-	}
-
 }
 
 void PmergeMe::sortMainChain(std::deque<Node>& mainChain, Node& straggler)
 {
 	sortingMainChainRecursively(mainChain, straggler);
-	// if (straggler.content >= 0)
-	// {
-	// 	binarySearchDequeForOdd(mainChain, straggler);
-	// }
-	// 여기에는 mArgDeque에 넣어야 함.
 }
 
 void PmergeMe::mergeInsertionSortingDeque(void)
@@ -317,17 +225,22 @@ void PmergeMe::mergeInsertionSortingDeque(void)
 	
 	test = mArgsDeque;
 	mArgsDeque.clear();
-	// std::sort(mainChain.begin(), mainChain.end());
 	sortMainChain(mainChain, straggler);
 	for (std::deque<Node>::iterator it = mainChain.begin(); it != mainChain.end(); it++)
 	{
 		mArgsDeque.push_back(it->content);
 	}
 	std::sort(test.begin(), test.end());
-	std::cout << "[sorted]\n[deque] ";
+
+	std::deque<Node>::iterator nodeIt = mainChain.begin();	
 	for (std::deque<int>::iterator it = test.begin(); it != test.end(); it++)
 	{
-		std::cout << *it << " ";
+		if (*it != nodeIt->content)
+		{
+			std::cout << *it << " != " << nodeIt->content << "달라" << std::endl;
+			exit(1);
+		}
+		nodeIt++;
 	}
 	std::cout << std::endl;
 	

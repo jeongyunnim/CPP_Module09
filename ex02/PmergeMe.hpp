@@ -14,8 +14,6 @@ typedef struct Node
 {
 	int content;
 	int pendingContent;
-	int level;
-
 } Node;
 
 class PmergeMe
@@ -43,7 +41,7 @@ private:
 	bool	argToContainer(const std::string& oneExpression);
 	bool	pushNumber(const std::string& numString);
 	int		findJacobsthalNum(int index);
-	void 	insertPendingChain(std::deque<Node>& mainChain, Node& straggler);
+	void 	insertPendingChain(std::deque<Node>& mainChain);
 
 	PmergeMe(void);
 	~PmergeMe(void);
