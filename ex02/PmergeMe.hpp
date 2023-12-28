@@ -10,13 +10,16 @@
 #include <list>
 #include "../Colors.hpp"
 
+typedef struct Node
+{
+	int content;
+	int pendingContent;
+} Node;
+
 class PmergeMe
 {
 
 public:
-
-	typedef	std::deque<std::pair<int, int> >	intPairDeque;
-	typedef	std::list<std::pair<int, int> >		intPairList;
 
 	static PmergeMe*	getInstance(void);
 	static void			cleanUp(void);
@@ -26,25 +29,39 @@ public:
 	void 				printArrangedArguments(void);
 	void				mergeInsertionSortingDeque(void);
 	void				mergeInsertionSortingList(void);
-
-private:
+	void				initJacobsthalSequence(void);
  
-	void	sortingPendingChainDeque(PmergeMe::intPairDeque& mainChain, int straggler);
-	void	sortingPendingChainList(PmergeMe::intPairList& mainChain, int straggler);
+private:
+
+	/* sort using deque */
+	void	sortingMainChainRecursively(std::deque<Node>& mainChain, Node& superStraggler);
+	void 	sortMainChain(std::deque<Node>& mainChain, Node& straggler);
+	void	sortingPendingChainDeque(std::deque<Node>& mainChain, Node& straggler);
+	void 	insertPendingChain(std::deque<Node>& mainChain);
+	
+	/* sort using list */
+	void	sortingMainChainRecursivelyList(std::list<Node>& mainChain, Node& superStraggler);
+	void	sortingPendingChainList(std::list<Node>& mainChain, Node& straggler);
+	void 	sortMainChainList(std::list<Node>& mainChain, Node& straggler);
+	void 	insertPendingChainList(std::list<Node>& mainChain);
+
+	/* parsing */
 	bool	readOneArg(std::string arg);
 	bool	argToContainer(const std::string& oneExpression);
 	bool	pushNumber(const std::string& numString);
+	int		findJacobsthalNum(int index);
 
+	/* Not use (orthodox canonical form) */
 	PmergeMe(void);
 	~PmergeMe(void);
 	PmergeMe& operator=(const PmergeMe& rhs);
 	PmergeMe(const PmergeMe& obj);
 
-	static PmergeMe *_sorter;
+	static PmergeMe *mSorter;
 
-	std::deque<int> _argsDeque;
-	std::list<int> _argsList;
-	
+	std::deque<int> mArgsDeque;
+	std::list<int>	mArgsList;
+	std::deque<int> mJacobsthalSequence;
 
 };
 
