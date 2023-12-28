@@ -24,8 +24,8 @@ static void	initMainList(std::list<int>& src, std::list<Node>& mainChain, Node& 
 		}
 		else
 		{
-			temp.content = first;
-			temp.pendingContent = second;
+			temp.content = second;
+			temp.pendingContent = first;
 		}
 		mainChain.push_back(temp);
 	}
@@ -81,7 +81,7 @@ static void binarySearchList(std::list<Node>& mainChain, Node& targetValue)
 			mainChain.insert(ftAdvanced(mainChain.begin(), mainChain.end(), mid), temp);
 			return ;
 		}
-		else if (*ftAdvanced(mainChain.begin(), mainChain.end(), mid)->content < targetValue.pendingContent)
+		else if (ftAdvanced(mainChain.begin(), mainChain.end(), mid)->content < targetValue.pendingContent)
 			left = ftAdvanced(mainChain.begin(), mainChain.end(), mid + 1);
 		else
 		{
@@ -94,11 +94,48 @@ static void binarySearchList(std::list<Node>& mainChain, Node& targetValue)
 	mainChain.insert(left, temp);
 }
 
+static void binarySearchListForOdd(std::list<Node>& mainChain, Node& targetValue)
+{
+	std::list<Node>::iterator	left = mainChain.begin();
+	std::list<Node>::iterator	right = mainChain.end();
+	size_t						len;
+	Node						temp;
+	int 						mid = -1;
+
+	right--;
+	temp.pendingContent = -1;
+	while (getLength(mainChain.begin(), left, -1) <= getLength(mainChain.begin(), right, -1))
+	{
+		if (mid == -1)
+			len = getLength(mainChain.begin(), mainChain.end(), targetValue.content);
+		else
+			len = getLength(left, right, -1);
+		mid = getLength(mainChain.begin(), left, -1) + len / 2;
+		if (ftAdvanced(mainChain.begin(), mainChain.end(), mid)->content == targetValue.content)
+		{
+			temp.content = targetValue.content;
+			mainChain.insert(ftAdvanced(mainChain.begin(), mainChain.end(), mid), temp);
+			return ;
+		}
+		else if (ftAdvanced(mainChain.begin(), mainChain.end(), mid)->content < targetValue.content)
+			left = ftAdvanced(mainChain.begin(), mainChain.end(), mid + 1);
+		else
+		{
+			if (mid == 0)
+				break ;
+			right = ftAdvanced(mainChain.begin(), mainChain.end(), mid - 1);
+		}
+	}
+	temp.content = targetValue.content;
+	mainChain.insert(left, temp);
+}
+
 static void	separateMainChain(std::list<Node>& pendingChain, std::list<Node>& target, Node& straggler)
 {
 	Node temp;
+	int	first;
+	int second;
 
-	temp.content = -1;
 	temp.pendingContent = -1;
 
 	if (target.size() % 2 == 1)
@@ -111,22 +148,22 @@ static void	separateMainChain(std::list<Node>& pendingChain, std::list<Node>& ta
 		straggler.content = -1;
 		straggler.pendingContent = -1;
 	}
-	if (target.size() <= 1)
+	std::list<Node>::iterator it = target.begin();
+	for (size_t i = 0; i + 1 < target.size(); i += 2)
 	{
-		return ;
-	}
-	// iterator 부분 advanced()로 바꿔야 함.
-	for (std::list<Node>::iterator it = target.begin(); it + 1 != target.end() && it != target.end(); it += 2)
-	{
-		if (it->content > (it + 1)->content)
+		first = it->content;
+		it++;
+		second = it->content;
+		it++;
+		if (first > second)
 		{
-			temp.content = it->content;
-			temp.pendingContent = (it + 1)->content;
+			temp.content = first;
+			temp.pendingContent = second;
 		}
 		else
 		{
-			temp.content = (it + 1)->content;
-			temp.pendingContent = it->content;
+			temp.content = second;
+			temp.pendingContent = first;
 		}
 		pendingChain.push_back(temp);
 	}
@@ -135,50 +172,39 @@ static void	separateMainChain(std::list<Node>& pendingChain, std::list<Node>& ta
 void PmergeMe::insertPendingChainList(std::list<Node>& mainChain)
 {
 	size_t				i = 0;
-	std::list<Node>	result = mainChain;
+	std::list<Node>		result = mainChain;
 	Node				temp;
 
 	temp.pendingContent = -1;
-	if (mainChain.size() == 2)
+	temp.content = mainChain.begin()->pendingContent;
+	result.push_front(temp);
+	for (int jacobsthalIndex = 1; i < mainChain.size(); i++ && jacobsthalIndex++)
 	{
-		temp.content = mainChain[0].pendingContent;
-		result.push_front(temp);
-		binarySearchList(result, mainChain[1]);
-	}
-	else
-	{
-		temp.content = mainChain[0].pendingContent;
-		result.push_front(temp);
-		for (int jacobsthalIndex = 1; i < mainChain.size(); i++ && jacobsthalIndex++)
+		i = findJacobsthalNum(jacobsthalIndex) - 1;
+		if (i >= mainChain.size())
 		{
-			i = findJacobsthalNum(jacobsthalIndex) - 1;
-			if (i >= mainChain.size())
-			{
-				i = mainChain.size() - 1;
-			}
-			for (int j = i; j >= findJacobsthalNum(jacobsthalIndex - 1); j--)
-				binarySearchList(result, mainChain[j]);
+			i = mainChain.size() - 1;
 		}
+		for (int j = i; j >= findJacobsthalNum(jacobsthalIndex - 1); j--)
+			binarySearchList(result, *ftAdvanced(mainChain.begin(), mainChain.end(), j));
 	}
 	mainChain = result;
 }
 
-void PmergeMe::sortingMainChainRecursively(std::deque<Node>& mainChain, Node& superStraggler)
+void PmergeMe::sortingMainChainRecursivelyList(std::list<Node>& mainChain, Node& superStraggler)
 {
-	std::deque<Node>	separatedChain;
-	Node				straggler;
+	std::list<Node>	separatedChain;
+	Node			straggler;
+	Node			temp;
 
-	//main chain to M--P chain(1/2 size) + init straggler
+	temp.pendingContent = -1;
 	separateMainChain(separatedChain, mainChain, straggler);
 	if (separatedChain.size() > 0)
 	{
-		sortingMainChainRecursively(separatedChain, straggler);
+		sortingMainChainRecursivelyList(separatedChain, straggler);
 	}
 	else if (separatedChain.size() == 0)
 	{
-		Node temp;
-
-		temp.pendingContent = -1;
 		if (separatedChain.size() == 0 && straggler.content >= 0)
 		{
 			temp.content = straggler.pendingContent;
@@ -186,15 +212,14 @@ void PmergeMe::sortingMainChainRecursively(std::deque<Node>& mainChain, Node& su
 			temp.content = straggler.content;
 			separatedChain.push_back(temp);
 			if (superStraggler.content >= 0)
-				binarySearchDequeForOdd(separatedChain, superStraggler);
+				binarySearchListForOdd(separatedChain, superStraggler);
 			mainChain = separatedChain;
 			return ;
 		}
 	}
-
-	for (std::deque<Node>::iterator separatedSequenceIt = separatedChain.begin(); separatedSequenceIt != separatedChain.end(); separatedSequenceIt++)
+	for (std::list<Node>::iterator separatedSequenceIt = separatedChain.begin(); separatedSequenceIt != separatedChain.end(); separatedSequenceIt++)
 	{
-		for (std::deque<Node>::iterator originalSequenceIt = mainChain.begin(); originalSequenceIt != mainChain.end(); originalSequenceIt++)
+		for (std::list<Node>::iterator originalSequenceIt = mainChain.begin(); originalSequenceIt != mainChain.end(); originalSequenceIt++)
 		{
 			if (separatedSequenceIt->content == originalSequenceIt->content)
 			{
@@ -204,36 +229,37 @@ void PmergeMe::sortingMainChainRecursively(std::deque<Node>& mainChain, Node& su
 			}
 		}
 	}
-	insertPendingChain(separatedChain);
+	insertPendingChainList(separatedChain);
 	if (superStraggler.content >= 0)
-		binarySearchDequeForOdd(separatedChain, superStraggler);
+	{
+		binarySearchListForOdd(separatedChain, superStraggler);
+	}
 	mainChain = separatedChain;
 }
 
-void PmergeMe::sortMainChain(std::deque<Node>& mainChain, Node& straggler)
+void PmergeMe::sortMainChainList(std::list<Node>& mainChain, Node& straggler)
 {
-	sortingMainChainRecursively(mainChain, straggler);
+	sortingMainChainRecursivelyList(mainChain, straggler);
+	mArgsList.clear();
+	for (std::list<Node>::iterator it = mainChain.begin(); it != mainChain.end(); it++)
+	{
+		mArgsList.push_back(it->content);
+	}
 }
 
-void PmergeMe::mergeInsertionSortingDeque(void)
+void PmergeMe::mergeInsertionSortingList(void)
 {
-	std::deque<Node>	mainChain;
-	Node				straggler;
-	std::deque<int> test;
+	std::list<Node>	mainChain;
+	Node			straggler;
+	std::list<int> test;
 
-	if (mArgsDeque.size() <= 1)
+	if (mArgsList.size() <= 1)
 	{
 		return ;
 	}
 	straggler.content = -1;
 	straggler.pendingContent = -1;
-	initMainDeque(mArgsDeque, mainChain, straggler);
-	
-	test = mArgsDeque;
-	mArgsDeque.clear();
-	sortMainChain(mainChain, straggler);
-	for (std::deque<Node>::iterator it = mainChain.begin(); it != mainChain.end(); it++)
-	{
-		mArgsDeque.push_back(it->content);
-	}
+	initMainList(mArgsList, mainChain, straggler);
+	test = mArgsList;
+	sortMainChainList(mainChain, straggler);
 }

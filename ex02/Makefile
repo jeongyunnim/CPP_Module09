@@ -10,6 +10,7 @@ SRCS		=	./main.cpp\
 				./PmergeMe.cpp\
 				./argParsing.cpp\
 				./mergeInsertionUsingDeque.cpp\
+				./mergeInsertionUsingList.cpp\
 				./singletonUtil.cpp\
 				../Colors.cpp\
 

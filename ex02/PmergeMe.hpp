@@ -30,20 +30,28 @@ public:
 	void				mergeInsertionSortingDeque(void);
 	void				mergeInsertionSortingList(void);
 	void				initJacobsthalSequence(void);
-	void				sortingMainChainRecursively(std::deque<Node>& mainChain, Node& superStraggler);
  
 private:
 
+	/* sort using deque */
+	void	sortingMainChainRecursively(std::deque<Node>& mainChain, Node& superStraggler);
 	void 	sortMainChain(std::deque<Node>& mainChain, Node& straggler);
 	void	sortingPendingChainDeque(std::deque<Node>& mainChain, Node& straggler);
-	void	sortingPendingChainList(PmergeMe::intPairList& mainChain, Node& straggler);
+	void 	insertPendingChain(std::deque<Node>& mainChain);
+	
+	/* sort using list */
+	void	sortingMainChainRecursivelyList(std::list<Node>& mainChain, Node& superStraggler);
+	void	sortingPendingChainList(std::list<Node>& mainChain, Node& straggler);
+	void 	sortMainChainList(std::list<Node>& mainChain, Node& straggler);
+	void 	insertPendingChainList(std::list<Node>& mainChain);
+
+	/* parsing */
 	bool	readOneArg(std::string arg);
 	bool	argToContainer(const std::string& oneExpression);
 	bool	pushNumber(const std::string& numString);
 	int		findJacobsthalNum(int index);
-	void 	insertPendingChain(std::deque<Node>& mainChain);
-	void 	insertPendingChainList(std::list<Node>& mainChain);
 
+	/* Not use (orthodox canonical form) */
 	PmergeMe(void);
 	~PmergeMe(void);
 	PmergeMe& operator=(const PmergeMe& rhs);
